@@ -10,5 +10,5 @@ This library helps to estimate how good a given instrument can detect a certain 
 .. |BlackStyle| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
 
-.. |LicenseBadge| image::https://img.shields.io/badge/License-MIT-yellow.svg
+.. |LicenseBadge| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
