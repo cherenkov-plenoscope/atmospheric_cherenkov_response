@@ -10,12 +10,36 @@ EXAMPLE = {
 
 
 def intersection_of_ray_on_ground(support, direction):
+    """
+    Returns the intersection-vector of a ray and the ground.
+    Ground is the x-y-plane where z = 0.
+
+    Parameters
+    ----------
+    support : array 3
+        Ray's support-vector
+    direction : array 3
+        Ray's direction-vector
+    """
     direction = direction / np.linalg.norm(direction)
     lam = -support[2] / direction[2]
     return support + lam * direction
 
 
 def estimate_projection_on_ground(instrument, num_rays=1000):
+    """
+    Returns the outer bounds ((xmin, xmax), (ymin, ymax)) of an instrument on
+    ground. Ground is the x-y-plane where z = 0.
+    The outer bounds mark the area where the ground collects photons which
+    can potentially be seen by the instrument.
+
+    Parameters
+    ----------
+    instrument : dict
+        Contains the instrument's bounding box and viewcone.
+    num_rays : int, default = 1000
+        The number of rays emitted to project the instrument's viewcone.
+    """
     xmin = -0.5 * instrument["bounding_box"]["width_x"]
     xmax = +0.5 * instrument["bounding_box"]["width_x"]
     ymin = -0.5 * instrument["bounding_box"]["width_y"]
