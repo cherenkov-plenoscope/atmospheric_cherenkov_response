@@ -57,7 +57,9 @@ grid area is A, grid centered on (0,0)
 
 Coordinate system
 -----------------
+
 ::
+
                                     | z
                                     |                               starting pos.
                                     |                                  ___---O
@@ -113,8 +115,6 @@ Coordinate system
                             /
                            /
                           / y
-
-
 
 .. |BlackStyle| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
