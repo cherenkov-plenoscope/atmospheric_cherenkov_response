@@ -5,7 +5,6 @@ import io
 import tarfile
 import shutil
 import json_numpy
-from . import unique
 
 
 def histogram_to_bytes(img):
@@ -31,11 +30,15 @@ def bytes_to_histogram(img_bytes_gz):
 # gzip-bytes to be read with bytes_to_histogram()
 
 
+UID_NUM_DIGITS = 12
+UID_FOTMAT_STR = "{:0" + str(UID_NUM_DIGITS) + "d}"
+
+
 def read_all_histograms(path):
     grids = {}
     with tarfile.open(path, "r") as tarfin:
         for tarinfo in tarfin:
-            idx = int(tarinfo.name[0 : unique.UID_NUM_DIGITS])
+            idx = int(tarinfo.name[0:UID_NUM_DIGITS])
             grids[idx] = tarfin.extractfile(tarinfo).read()
     return grids
 
@@ -48,7 +51,7 @@ def read_histograms(path, indices=None):
         grids = {}
         with tarfile.open(path, "r") as tarfin:
             for tarinfo in tarfin:
-                idx = int(tarinfo.name[0 : unique.UID_NUM_DIGITS])
+                idx = int(tarinfo.name[0:UID_NUM_DIGITS])
                 if idx in indices_set:
                     grids[idx] = tarfin.extractfile(tarinfo).read()
         return grids
@@ -57,7 +60,7 @@ def read_histograms(path, indices=None):
 def write_histograms(path, grid_histograms):
     with tarfile.open(path + ".tmp", "w") as tarfout:
         for idx in grid_histograms:
-            filename = unique.UID_FOTMAT_STR.format(idx) + ".f4.gz"
+            filename = UID_FOTMAT_STR.format(idx) + ".f4.gz"
             with io.BytesIO() as buff:
                 info = tarfile.TarInfo(filename)
                 info.size = buff.write(grid_histograms[idx])
@@ -87,7 +90,7 @@ class GridReader:
         if self.next_info is None:
             raise StopIteration
 
-        idx = int(self.next_info.name[0 : unique.UID_NUM_DIGITS])
+        idx = int(self.next_info.name[0:UID_NUM_DIGITS])
         bimg = self.tar.extractfile(self.next_info).read()
         img = bytes_to_histogram(bimg)
         self.next_info = self.tar.next()

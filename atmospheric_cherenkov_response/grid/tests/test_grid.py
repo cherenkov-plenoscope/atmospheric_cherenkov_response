@@ -1,13 +1,12 @@
-import plenoirf
+import atmospheric_cherenkov_response
 import corsika_primary as cpw
 import numpy as np
-import pytest
 
 
 PLENOSCOPE_DIAMETER = 71.0
 NUM_BINS_RADIUS = 512
 
-PLENOSCOPE_GRID_GEOMETRY = plenoirf.grid.init_geometry(
+PLENOSCOPE_GRID_GEOMETRY = atmospheric_cherenkov_response.grid.init_geometry(
     instrument_aperture_outer_diameter=PLENOSCOPE_DIAMETER,
     bin_width_overhead=1.0,
     instrument_field_of_view_outer_radius_deg=3.25,
@@ -66,7 +65,9 @@ def test_normalize_matrix_rows():
     mat[:, 2] = prng.uniform(size=100)
     for row in mat:
         assert np.abs(np.linalg.norm(row) - 1) > 1e-6
-    norm_mat = plenoirf.grid._normalize_rows_in_matrix(mat=mat)
+    norm_mat = atmospheric_cherenkov_response.grid._normalize_rows_in_matrix(
+        mat=mat
+    )
     for row in norm_mat:
         assert np.abs(np.linalg.norm(row) - 1) < 1e-6
 
@@ -86,7 +87,7 @@ def test_grid_assign_head_on():
         y_std_m=100.0,
         num_bunches=10 * 1000,
     )
-    result = plenoirf.grid.assign(
+    result = atmospheric_cherenkov_response.grid.assign(
         cherenkov_bunches=cherenkov_bunches,
         grid_geometry=PLENOSCOPE_GRID_GEOMETRY,
         shift_x=0.0,
@@ -130,7 +131,7 @@ def test_shower_cx_moves_out_of_fov():
             y_std_m=100.0,
             num_bunches=10 * 1000,
         )
-        result = plenoirf.grid.assign(
+        result = atmospheric_cherenkov_response.grid.assign(
             cherenkov_bunches=cherenkov_bunches,
             grid_geometry=PLENOSCOPE_GRID_GEOMETRY,
             shift_x=0.0,
@@ -163,7 +164,7 @@ def test_shower_size_increases():
             y_std_m=100.0,
             num_bunches=int(shower_size),
         )
-        result = plenoirf.grid.assign(
+        result = atmospheric_cherenkov_response.grid.assign(
             cherenkov_bunches=cherenkov_bunches,
             grid_geometry=PLENOSCOPE_GRID_GEOMETRY,
             shift_x=0.0,
@@ -212,7 +213,7 @@ def test_shower_x_moves_not_counteracted():
             y_std_m=10.0,
             num_bunches=10 * 1000,
         )
-        result = plenoirf.grid.assign(
+        result = atmospheric_cherenkov_response.grid.assign(
             cherenkov_bunches=cherenkov_bunches,
             grid_geometry=PLENOSCOPE_GRID_GEOMETRY,
             shift_x=0.0,
@@ -289,7 +290,7 @@ def test_shower_x_moves_but_counteracted():
             y_std_m=10.0,
             num_bunches=10 * 1000,
         )
-        result = plenoirf.grid.assign(
+        result = atmospheric_cherenkov_response.grid.assign(
             cherenkov_bunches=cherenkov_bunches,
             grid_geometry=PLENOSCOPE_GRID_GEOMETRY,
             shift_x=-1.0 * scenarios[s]["core_wrt_obslvl"],

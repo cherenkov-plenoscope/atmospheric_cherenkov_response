@@ -5,6 +5,7 @@ import json_numpy
 # artificial core limitation
 # --------------------------
 
+
 def where_grid_idxs_within_radius(grid_geometry, radius, center_x, center_y):
     """
     Returns the idxs in x, and y of the grid where the bin is within a circle
