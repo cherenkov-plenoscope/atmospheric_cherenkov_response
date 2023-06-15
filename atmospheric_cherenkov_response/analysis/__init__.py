@@ -1,5 +1,11 @@
 import numpy as np
-from .. import utils
+
+
+def divide_silent(numerator, denominator, default):
+    valid = denominator != 0
+    division = np.ones(shape=numerator.shape) * default
+    division[valid] = numerator[valid] / denominator[valid]
+    return division
 
 
 def effective_quantity_for_grid(
@@ -87,7 +93,7 @@ def effective_quantity_for_grid(
         energy_GeV, weights=total_num_grid_cells, bins=energy_bin_edges_GeV,
     )[0]
 
-    effective_quantity = utils._divide_silent(
+    effective_quantity = divide_silent(
         numerator=quantity_detected, denominator=count_thrown, default=0.0
     )
 
@@ -106,7 +112,7 @@ def effective_quantity_for_grid(
         weights=(mask_detected * num_grid_cells_above_lose_threshold),
     )[0]
 
-    effective_quantity_relative_uncertainty = utils._divide_silent(
+    effective_quantity_relative_uncertainty = divide_silent(
         numerator=np.sqrt(A_square), denominator=A, default=0.0
     )
 
