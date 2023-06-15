@@ -3,7 +3,7 @@ import numpy as np
 
 
 def assert_cone_edge(az_deg, ha_deg, d, margin=1e-9):
-    _d = acr.grid.viewcone.make_direction_on_edge_of_viewcone_when_viewcone_pointing_to_z(
+    _d = acr.instrument.viewcone.make_direction_on_edge_of_viewcone_when_viewcone_pointing_to_z(
         viewcone_azimuth_deg=az_deg, viewcone_half_angle_deg=ha_deg
     )
     assert np.linalg.norm(_d - d) < 1e-9
@@ -21,7 +21,7 @@ def test_edge_of_viewcone():
 
 
 def assert_pointing(az_deg, zd_deg, d, margin=1e-9):
-    _d = acr.grid.viewcone.make_direction_on_edge_of_viewcone_when_viewcone_pointing(
+    _d = acr.instrument.viewcone.make_direction_on_edge_of_viewcone_when_viewcone_pointing(
         pointing_azimuth_deg=az_deg,
         pointing_zenith_deg=zd_deg,
         viewcone_azimuth_deg=0.0,
