@@ -13,7 +13,7 @@ setuptools.setup(
     author="Sebastian Achim Mueller, Werner Hofmann",
     author_email="sebastian-achim.mueller@mpi-hd.mpg.de",
     packages=["atmospheric_cherenkov_response"],
-    install_requires=["cython", "json_numpy"],
+    install_requires=[],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
