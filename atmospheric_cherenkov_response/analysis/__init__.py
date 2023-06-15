@@ -1,5 +1,4 @@
 import numpy as np
-import sparse_numeric_table as spt
 from .. import utils
 
 
