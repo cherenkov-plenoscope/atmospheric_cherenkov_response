@@ -2,6 +2,7 @@ import numpy as np
 import photon_spectra
 import binning_utils
 import solid_angle_utils
+import plenopy
 from optic_object_wavefronts.geometry.grid import hexagonal as hexgrid
 from corsika_primary.I import BUNCH
 from .. import night_sky_background
@@ -21,7 +22,7 @@ def init(
     mirror_focal_length_m,
     field_of_view_half_angle_deg,
     focus_depth_m,
-    trigger_pixel_half_angle_deg,
+    pixel_half_angle_deg,
     trigger_threshold_num_photons,
     trigger_integration_num_time_slices,
     time_slice_duration_s,
@@ -37,7 +38,7 @@ def init(
     assert mirror_focal_length_m > 0
     assert field_of_view_half_angle_deg > 0
     assert focus_depth_m > 0
-    assert trigger_pixel_half_angle_deg > 0
+    assert pixel_half_angle_deg > 0
     assert trigger_threshold_num_photons > 0
     assert trigger_integration_num_time_slices > 0
     assert time_slice_duration_s > 0
@@ -54,15 +55,15 @@ def init(
     f = mirror_focal_length_m
     pixel_x_Tscreen, pixel_y_Tscreen = make_pixel_x_y(
         field_of_view_radius=f * tandeg(field_of_view_half_angle_deg),
-        trigger_pixel_radius=f * tandeg(trigger_pixel_half_angle_deg),
+        pixel_radius=f * tandeg(pixel_half_angle_deg),
     )
 
     pixel = {
         "x_m": pixel_x_Tscreen,
         "y_m": pixel_y_Tscreen,
         "num": len(pixel_y_Tscreen),
-        "r_m": f * tandeg(trigger_pixel_half_angle_deg),
-        "r_deg": trigger_pixel_half_angle_deg,
+        "r_m": f * tandeg(pixel_half_angle_deg),
+        "r_deg": pixel_half_angle_deg,
     }
     pixel["x_y_tree"] = scipy.spatial.cKDTree(
         data=np.c_[pixel["x_m"], pixel["y_m"]]
@@ -112,7 +113,7 @@ def init(
     return dummy_instrument
 
 
-def init_portal():
+def init_portal(focus_depth_m=1e4):
     opt = photon_spectra.cta_mirrors.init("cta_mst_dielectric_after")
     pde = photon_spectra.hamamatsu_r11920_100_05.init()
 
@@ -126,8 +127,8 @@ def init_portal():
         mirror_diameter_m=71,
         mirror_focal_length_m=71 * 1.5,
         field_of_view_half_angle_deg=3.25,
-        focus_depth_m=10e3,
-        trigger_pixel_half_angle_deg=0.2,
+        focus_depth_m=focus_depth_m,
+        pixel_half_angle_deg=2.2 * 0.5 * 0.067,
         trigger_threshold_num_photons=50,
         trigger_integration_num_time_slices=10,
         time_slice_duration_s=0.5e-9,
@@ -175,7 +176,7 @@ def draw_night_sky_background(
     nnn = np.round(prng.normal(loc=mean, scale=std, size=size))
     nnn = nnn.astype(np.int)
     nnn[nnn < 0] = 0
-    nsb = nnn.reshape(shape=(num_time_slices, num_pixel))
+    nsb = nnn.reshape((num_time_slices, num_pixel))
     return nsb
 
 
@@ -187,7 +188,7 @@ def estimate_response_to_cherenkov(
 ):
     dum = dummy_instrument
 
-    cer_Tpap = get_cherenkov_bunches_which_cause_response_in_dummy_instrument(
+    cer_Tpap = get_cherenkov_bunches_which_cause_response(
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
         dummy_instrument=dum,
         prng=prng,
@@ -215,16 +216,20 @@ def estimate_response_to_cherenkov(
         t_Tscreen=t_rel,
         pixel_x_y_tree=dum["camera"]["pixel"]["x_y_tree"],
         pixel_r=dum["camera"]["pixel"]["r_m"],
-        time_bin_edges=dum["time_slices"]["edges_s"],
+        time_bin_edges=dum["camera"]["time_slices"]["edges_s"],
     )
     image_sequence = np.zeros(
-        shape=(dum["time_slices"]["num"], dum["camera"]["pixel"]["num"])
+        shape=(
+            dum["camera"]["time_slices"]["num"],
+            dum["camera"]["pixel"]["num"],
+        )
     )
     mask_in_pixel = pixel_id != -1
     mask_in_time_slice = np.logical_and(
-        tslice_id < dum["time_slices"]["num"], tslice_id > -1
+        tslice_id < dum["camera"]["time_slices"]["num"], tslice_id > -1
     )
     mask = np.logical_and(mask_in_pixel, mask_in_time_slice)
+
     pixel_id = pixel_id[mask]
     tslice_id = tslice_id[mask]
 
@@ -299,7 +304,7 @@ def evaluate_by_wavelength(
     )
 
 
-def get_cherenkov_bunches_which_cause_response_in_dummy_instrument(
+def get_cherenkov_bunches_which_cause_response(
     cherenkov_bunches_Tpap, dummy_instrument, prng,
 ):
     dum = dummy_instrument
@@ -307,9 +312,13 @@ def get_cherenkov_bunches_which_cause_response_in_dummy_instrument(
 
     # remove bunches outside of mirror
     # --------------------------------
-    bunch_r2 = cer[:, BUNCH.X] ** 2 + cer[:, BUNCH.Y] ** 2
-    mirror_r2 = (0.5 * dum["mirror"]["diameter_m"]) ** 2
-    mask_on_mirror = r2 <= mirror_r2
+    m_over_cm = 1e-2
+    cer_x_m = m_over_cm * cer[:, BUNCH.X]
+    cer_y_m = m_over_cm * cer[:, BUNCH.Y]
+
+    bunch_r2_m2 = cer_x_m ** 2 + cer_y_m ** 2
+    mirror_r2_m2 = (0.5 * dum["mirror"]["diameter_m"]) ** 2
+    mask_on_mirror = bunch_r2_m2 <= mirror_r2_m2
     cer = cer[mask_on_mirror]
 
     # remove bunches (atmosphere, mirror, photo-sensor)
@@ -347,11 +356,11 @@ def get_cherenkov_bunches_which_cause_response_in_dummy_instrument(
 
 
 def make_pixel_x_y(
-    field_of_view_radius, trigger_pixel_radius,
+    field_of_view_radius, pixel_radius,
 ):
-    spacing = trigger_pixel_radius  # overlap is intended
+    spacing = 2 * pixel_radius
     num_pixel_on_diagonal = int(
-        np.ceil(2 * field_of_view_radius / trigger_pixel_radius)
+        np.ceil(2 * field_of_view_radius / pixel_radius)
     )
     grid = hexgrid.init_from_spacing(
         spacing=spacing, fN=num_pixel_on_diagonal,
@@ -392,31 +401,26 @@ def calculate_photon_x_y_intersections_on_screen(
     """
     assert focal_length > 0.0
     assert screen_distance > 0.0
-    num = len(cx)
-    assert num == len(cy)
-    assert num == len(x)
-    assert num == len(y)
+    num = len(cx_Tpap)
+    assert num == len(cy_Tpap)
+    assert num == len(x_Tpap)
+    assert num == len(y_Tpap)
 
     f = focal_length
     d = screen_distance
     tan = np.tan
-    cx = cx_Tpap
-    cy = cy_Tpap
-    x = x_Tpap
-    y = y_Tpap
 
     intersections_on_focal_plane = np.array(
-        [-f * tan(cx), -f * tan(cy), f * np.ones(num)]
-    )
+        [-f * tan(cx_Tpap), -f * tan(cy_Tpap), f * np.ones(num)]
+    ).T
 
-    supports_on_aperture = np.array([x, y, np.zeros(num)])
+    supports_on_aperture = np.array([x_Tpap, y_Tpap, np.zeros(num)]).T
 
     directions_leaving_aperture = (
         intersections_on_focal_plane - supports_on_aperture
     )
     directions_leaving_aperture = normalize_axis_1(directions_leaving_aperture)
-
-    scale_factor = screen_distance / directions_leaving_aperture[:, 2]
+    scale_factors = screen_distance / directions_leaving_aperture[:, 2]
 
     intersections_on_screen = (
         supports_on_aperture
@@ -463,6 +467,7 @@ def calculate_photon_x_y_t_on_screen(
     dd = calculate_relative_path_length_for_isochor_imagen(
         cx_Tpap=cx_Tpap, cy_Tpap=cy_Tpap, x_Tpap=x_Tpap, y_Tpap=y_Tpap,
     )
+
     dt = dd / speed_of_light
     t_Tscreen = t_Tpap + dt
 
@@ -472,12 +477,88 @@ def calculate_photon_x_y_t_on_screen(
 def bin_x_y_t_into_pixel_and_time_slice(
     x_Tscreen, y_Tscreen, t_Tscreen, pixel_x_y_tree, pixel_r, time_bin_edges,
 ):
-    num_photons = len(x_Tscreen)
-    assert num_photons == len(y_Tscreen)
-    assert num_photons == len(t_Tscreen)
+    px = bin_x_y_into_pixel(
+        x_Tscreen=x_Tscreen,
+        y_Tscreen=y_Tscreen,
+        pixel_x_y_tree=pixel_x_y_tree,
+        pixel_r=pixel_r,
+    )
 
-    d, pixel_i = pixel_x_y_tree.query(np.c_[x_Tscreen, y_Tscreen])
-    pixel_i[d >= pixel_r] = -1
+    tx = bin_t_into_time_slice(
+        t_Tscreen=t_Tscreen, time_bin_edges=time_bin_edges
+    )
+
+    return px, tx
+
+
+def bin_x_y_into_pixel(x_Tscreen, y_Tscreen, pixel_x_y_tree, pixel_r):
+    """
+    returns -1 when missed
+    """
+    dist, pixel_i = pixel_x_y_tree.query(np.c_[x_Tscreen, y_Tscreen])
+    pixel_i[dist >= pixel_r] = -1
+    return pixel_i
+
+
+def bin_t_into_time_slice(t_Tscreen, time_bin_edges):
+    """
+    returns -1 when missed
+    """
     tslice_i = np.digitize(x=t_Tscreen, bins=time_bin_edges, right=False) - 1
+    num_bins = len(time_bin_edges) - 1
 
-    return pixel_i, tslice_i
+    mask_miss = tslice_i >= num_bins
+    tslice_i[mask_miss] = -1
+
+    return tslice_i
+
+
+def make_cherenkov_bunches(
+    prng,
+    size=1000,
+    emission_point_m=[0, 0, 1e4],
+    wavelength_m=433e-9,
+    bunch_size=1.0,
+    mirror_radius_m=10,
+):
+    cer = []
+
+    cm_over_m = 1e2
+    ns_over_s = 1e-9
+    nm_over_m = 1e9
+    speed_of_light = 299792458
+
+    mirror_impacts_x = prng.uniform(
+        low=-mirror_radius_m, high=mirror_radius_m, size=size
+    )
+    mirror_impacts_y = prng.uniform(
+        low=-mirror_radius_m, high=mirror_radius_m, size=size
+    )
+
+    mirror_impacts = np.array(
+        [mirror_impacts_x, mirror_impacts_y, np.zeros(size)]
+    ).T
+
+    incidents = -mirror_impacts + emission_point_m
+
+    distances = np.linalg.norm(incidents, axis=1)
+
+    cxcycz = np.array(incidents)
+    cxcycz[:, 0] /= distances
+    cxcycz[:, 1] /= distances
+    cxcycz[:, 2] /= distances
+
+    cer = np.zeros(shape=(size, 8), dtype=np.float32)
+    times = distances / speed_of_light
+
+    # x/cm, y/cm, cx/1, cy/1, time/ns, zem/cm, bsize/1, wvl/nm
+    # --------------------------------------------------------
+    cer[:, BUNCH.X] = mirror_impacts_x * cm_over_m
+    cer[:, BUNCH.Y] = mirror_impacts_y * cm_over_m
+    cer[:, BUNCH.CX] = cxcycz[:, 0]
+    cer[:, BUNCH.CY] = cxcycz[:, 1]
+    cer[:, BUNCH.TIME] = times * ns_over_s
+    cer[:, BUNCH.ZEM] = np.ones(size) * emission_point_m[2] * cm_over_m
+    cer[:, BUNCH.BSIZE] = np.ones(size) * bunch_size
+    cer[:, BUNCH.WVL] = np.ones(size) * wavelength_m * nm_over_m
+    return cer
