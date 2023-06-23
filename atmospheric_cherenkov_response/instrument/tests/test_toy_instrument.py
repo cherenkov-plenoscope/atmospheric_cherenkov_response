@@ -20,7 +20,7 @@ def approx(a, b, eps=1e-6):
 
 def test_normalize_axis_1():
     v = np.array([[1.0, 1, 1], [2.0, 2, 2],])
-    vn = acr.instrument.dummy.normalize_axis_1(v=v)
+    vn = acr.instrument.toy.normalize_axis_1(v=v)
     assert vn.shape == v.shape
 
     for row in range(len(vn)):
@@ -30,7 +30,7 @@ def test_normalize_axis_1():
 
 def test_calculate_photon_x_y_intersections_on_screen():
     # on axis
-    x, y = acr.instrument.dummy.calculate_photon_x_y_intersections_on_screen(
+    x, y = acr.instrument.toy.calculate_photon_x_y_intersections_on_screen(
         focal_length=1,
         screen_distance=1,
         cx_Tpap=np.array([0]),
@@ -46,7 +46,7 @@ def test_calculate_photon_x_y_intersections_on_screen():
             (
                 x,
                 y,
-            ) = acr.instrument.dummy.calculate_photon_x_y_intersections_on_screen(
+            ) = acr.instrument.toy.calculate_photon_x_y_intersections_on_screen(
                 focal_length=1,
                 screen_distance=1,
                 cx_Tpap=np.array([d2r(1)]),
@@ -62,7 +62,7 @@ def test_calculate_photon_x_y_intersections_on_screen():
             (
                 x,
                 y,
-            ) = acr.instrument.dummy.calculate_photon_x_y_intersections_on_screen(
+            ) = acr.instrument.toy.calculate_photon_x_y_intersections_on_screen(
                 focal_length=1,
                 screen_distance=1.01,
                 cx_Tpap=np.array([0]),
@@ -77,7 +77,7 @@ def test_calculate_photon_x_y_intersections_on_screen():
 
 def test_calculate_relative_path_length_for_isochor_imagen():
     # on axis
-    d = acr.instrument.dummy.calculate_relative_path_length_for_isochor_imagen(
+    d = acr.instrument.toy.calculate_relative_path_length_for_isochor_imagen(
         cx_Tpap=np.array([0]),
         cy_Tpap=np.array([0]),
         x_Tpap=np.array([0]),
@@ -87,7 +87,7 @@ def test_calculate_relative_path_length_for_isochor_imagen():
     assert d[0] == 0.0
 
     # smalle angle off axis but impacts in center of mirror
-    d = acr.instrument.dummy.calculate_relative_path_length_for_isochor_imagen(
+    d = acr.instrument.toy.calculate_relative_path_length_for_isochor_imagen(
         cx_Tpap=np.array([0]),
         cy_Tpap=np.array([d2r(3)]),
         x_Tpap=np.array([0]),
@@ -109,7 +109,7 @@ def test_calculate_relative_path_length_for_isochor_imagen():
     #                       --__    / opp = d
     #                           --_x
 
-    d = acr.instrument.dummy.calculate_relative_path_length_for_isochor_imagen(
+    d = acr.instrument.toy.calculate_relative_path_length_for_isochor_imagen(
         cx_Tpap=np.array([0]),
         cy_Tpap=np.array([d2r(9)]),
         x_Tpap=np.array([0]),
@@ -127,7 +127,7 @@ def test_calculate_photon_x_y_t_on_screen():
     f = 106.5
     pseudo_infinity = 1e99
 
-    x, y, t = acr.instrument.dummy.calculate_photon_x_y_t_on_screen(
+    x, y, t = acr.instrument.toy.calculate_photon_x_y_t_on_screen(
         focus_depth=pseudo_infinity,
         focal_length=f,
         cx_Tpap=np.array([0.0, d2r(1.0), 0.0]),
@@ -160,7 +160,7 @@ def test_make_pixel_x_y():
     field_of_view_radius = 1.0
     pixel_radius = 0.05
 
-    x, y = acr.instrument.dummy.make_pixel_x_y(
+    x, y = acr.instrument.toy.make_pixel_x_y(
         field_of_view_radius=field_of_view_radius, pixel_radius=pixel_radius
     )
 
@@ -212,7 +212,7 @@ def test_get_cherenkov_bunches_which_cause_response_in_dummy_instrument():
         NN = 1000
         nn = 0
         for i in range(NN):
-            cer = acr.instrument.dummy.get_cherenkov_bunches_which_cause_response(
+            cer = acr.instrument.toy.get_cherenkov_bunches_which_cause_response(
                 cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
                 dummy_instrument=toy,
                 prng=prng,
@@ -256,7 +256,7 @@ def test_mirror():
 
     assert len(cherenkov_bunches_Tpap) == 4 * Nr * Nr
 
-    cer = acr.instrument.dummy.get_cherenkov_bunches_which_cause_response(
+    cer = acr.instrument.toy.get_cherenkov_bunches_which_cause_response(
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
         dummy_instrument=toy,
         prng=prng,
@@ -269,7 +269,7 @@ def test_mirror():
 
 
 def test_bin_t_into_time_slice():
-    tx = acr.instrument.dummy.bin_t_into_time_slice(
+    tx = acr.instrument.toy.bin_t_into_time_slice(
         t_Tscreen=[-0.5, 0.5, 1.9, 3.4], time_bin_edges=[0, 1, 2]
     )
 
@@ -280,9 +280,9 @@ def test_bin_t_into_time_slice():
 
 
 def test_bin_x_y_into_pixel():
-    portal = acr.instrument.dummy.init_portal()
+    portal = acr.instrument.toy.init_portal()
 
-    px = acr.instrument.dummy.bin_x_y_into_pixel(
+    px = acr.instrument.toy.bin_x_y_into_pixel(
         x_Tscreen=[0, 100],
         y_Tscreen=[0, 100],
         pixel_x_y_tree=portal["camera"]["pixel"]["x_y_tree"],
@@ -302,7 +302,7 @@ def test_draw_night_sky_background():
     dt = 1e-9
     R = 60e9
 
-    nsb = acr.instrument.dummy.draw_night_sky_background(
+    nsb = acr.instrument.toy.draw_night_sky_background(
         prng=prng,
         num_time_slices=num_time_slices,
         num_pixel=num_pixel,
@@ -320,7 +320,7 @@ def test_draw_night_sky_background():
 def test_make_cherenkov_bunches():
     prng = np.random.Generator(np.random.PCG64(42))
 
-    cer = acr.instrument.dummy.make_cherenkov_bunches(
+    cer = acr.instrument.toy.make_cherenkov_bunches(
         prng=prng,
         size=1337,
         emission_point_m=[0, 0, 1e4],
@@ -349,7 +349,7 @@ def test_response():
     emission_depth_m = 10e3
 
     num_cer = 42 * 1337
-    cherenkov_bunches_Tpap = acr.instrument.dummy.make_cherenkov_bunches(
+    cherenkov_bunches_Tpap = acr.instrument.toy.make_cherenkov_bunches(
         prng=prng,
         size=num_cer,
         emission_point_m=[30, 400, emission_depth_m],
@@ -360,11 +360,11 @@ def test_response():
 
     assert len(cherenkov_bunches_Tpap) == num_cer
 
-    portal_in_focus = acr.instrument.dummy.init_portal(
+    portal_in_focus = acr.instrument.toy.init_portal(
         focus_depth_m=emission_depth_m
     )
 
-    resi, truth = acr.instrument.dummy.estimate_response_to_cherenkov(
+    resi, truth = acr.instrument.toy.estimate_response_to_cherenkov(
         prng=prng,
         dummy_instrument=portal_in_focus,
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
@@ -393,9 +393,9 @@ def test_response():
 
     # out of focus
     # ------------
-    portal_out_of_focus = acr.instrument.dummy.init_portal(focus_depth_m=3e3)
+    portal_out_of_focus = acr.instrument.toy.init_portal(focus_depth_m=3e3)
 
-    reso, truth = acr.instrument.dummy.estimate_response_to_cherenkov(
+    reso, truth = acr.instrument.toy.estimate_response_to_cherenkov(
         prng=prng,
         dummy_instrument=portal_out_of_focus,
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,

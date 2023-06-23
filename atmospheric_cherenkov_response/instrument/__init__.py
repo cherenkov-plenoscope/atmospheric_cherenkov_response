@@ -1,5 +1,5 @@
 import numpy as np
-from . import dummy
+from . import toy
 from . import viewcone
 from . import bounding_box
 
