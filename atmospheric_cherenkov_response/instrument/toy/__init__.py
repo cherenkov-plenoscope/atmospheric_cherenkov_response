@@ -24,6 +24,7 @@ def init(
     focus_depth_m,
     pixel_half_angle_deg,
     trigger_threshold_num_photons,
+    trigger_pixel_half_angle_deg,
     trigger_integration_num_time_slices,
     time_slice_duration_s,
     num_time_slices,
@@ -43,6 +44,8 @@ def init(
     assert trigger_integration_num_time_slices > 0
     assert time_slice_duration_s > 0
     assert num_time_slices > 0
+    assert trigger_pixel_half_angle_deg > 0
+    assert trigger_pixel_half_angle_deg > pixel_half_angle_deg
 
     assert_wavelength_values(
         wavelength=reflectivity_wavelength_m, values=reflectivity
@@ -77,7 +80,12 @@ def init(
         "edges_s": np.linspace(0.0, dt * num_t, num_t + 1) - 0.5 * dt * num_t,
     }
 
-    dummy_instrument = {
+    rigger_pixel_summation = make_trigger_pixel_summation(
+        x_y_pixel_tree=pixel["x_y_tree"],
+        radius=f * tandeg(trigger_pixel_half_angle_deg),
+    )
+
+    instrument = {
         "mirror": {
             "diameter_m": mirror_diameter_m,
             "focal_length_m": mirror_focal_length_m,
@@ -97,20 +105,21 @@ def init(
             "focus_depth_m": focus_depth_m,
         },
         "trigger": {
+            "pixel_summation": rigger_pixel_summation,
             "integration_num_time_slices": trigger_integration_num_time_slices,
         },
     }
 
-    dummy_instrument["camera"]["pixel"][
+    instrument["camera"]["pixel"][
         "average_background_rate_per_s"
     ] = estimate_rate_in_trigger_pixel_from_night_sky_background(
-        dummy_instrument=dummy_instrument,
+        instrument=instrument,
         background_wavelength_m=background_wavelength_m,
         background_differential_flux_per_m2_per_sr_per_s_per_m=background_differential_flux_per_m2_per_sr_per_s_per_m,
         num_wavelength_steps=1337,
     )
 
-    return dummy_instrument
+    return instrument
 
 
 def init_portal(focus_depth_m=1e4):
@@ -128,8 +137,9 @@ def init_portal(focus_depth_m=1e4):
         mirror_focal_length_m=71 * 1.5,
         field_of_view_half_angle_deg=3.25,
         focus_depth_m=focus_depth_m,
-        pixel_half_angle_deg=2.2 * 0.5 * 0.067,
+        pixel_half_angle_deg=0.5 * 0.067,
         trigger_threshold_num_photons=50,
+        trigger_pixel_half_angle_deg=1.1 * 0.067,
         trigger_integration_num_time_slices=10,
         time_slice_duration_s=0.5e-9,
         num_time_slices=200,
@@ -142,28 +152,57 @@ def init_portal(focus_depth_m=1e4):
     )
 
 
-def estimate_response(prng, dummy_instrument, cherenkov_bunches_Tpap):
-    cer, cer_truth = estimate_response_to_cherenkov(
+def estimate_trigger_level_to_be_compared_with_threshold(trigger_response):
+    return np.max(trigger_response, axis=1)
+
+
+def estimate_trigger_response(camera_response, instrument):
+    # integrate in  solid angle over neighbor pixels
+    # ----------------------------------------------
+    trigger_image = make_trigger_image(
+        camera_response=camera_response,
+        trigger_pixel_summation=instrument["trigger"]["pixel_summation"],
+    )
+
+    # integrate in time
+    # -----------------
+    num_time_slices = camera_response.shape[0]
+    trigger_response = np.zeros(shape=trigger_image.shape)
+    for t in range(num_time_slices):
+        t_start = t
+        t_stop = t_start + instrument["trigger"]["integration_num_time_slices"]
+        if t_stop >= num_time_slices:
+            t_stop = num_time_slices - 1
+        for u in np.arange(t_start, t_stop):
+            trigger_response[t, :] += trigger_image[u, :]
+
+    return trigger_response
+
+
+def estimate_camera_response(prng, instrument, cherenkov_bunches_Tpap):
+    cer, cer_truth = estimate_camera_response_to_cherenkov(
         prng=prng,
-        dummy_instrument=dummy_instrument,
+        instrument=instrument,
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
     )
-    nsb = estimate_response_to_night_sky_background(
-        prng=prng, dummy_instrument=dummy_instrument,
+    nsb, nsb_truth = estimate_camera_response_to_night_sky_background(
+        prng=prng, instrument=instrument,
     )
     res = nsb + cer
-    return res, {"cherenkov": cer_truth}
+    return res, {"cherenkov": cer_truth, "night_sky_background": nsb_truth}
 
 
-def estimate_response_to_night_sky_background(prng, dummy_instrument):
-    dum = dummy_instrument
-    return draw_night_sky_background(
+def estimate_camera_response_to_night_sky_background(prng, instrument):
+    dum = instrument
+    nsb = draw_night_sky_background(
         prng=prng,
         num_time_slices=dum["camera"]["time_slices"]["num"],
         num_pixel=dum["camera"]["pixel"]["num"],
         time_slice_duration_s=dum["camera"]["time_slices"]["duration_s"],
         rate_per_s=dum["camera"]["pixel"]["average_background_rate_per_s"],
     )
+    truth = {}
+    return nsb, truth
 
 
 def draw_night_sky_background(
@@ -185,17 +224,14 @@ def draw_night_sky_background(
     return nsb
 
 
-def estimate_response_to_cherenkov(
-    prng,
-    dummy_instrument,
-    cherenkov_bunches_Tpap,
-    speed_of_light_m_per_s=299792458,
+def estimate_camera_response_to_cherenkov(
+    prng, instrument, cherenkov_bunches_Tpap, speed_of_light_m_per_s=299792458,
 ):
-    dum = dummy_instrument
+    dum = instrument
 
     cer_Tpap = get_cherenkov_bunches_which_cause_response(
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
-        dummy_instrument=dum,
+        instrument=dum,
         prng=prng,
     )
 
@@ -204,11 +240,11 @@ def estimate_response_to_cherenkov(
     x_Tscreen, y_Tscreen, t_Tscreen = calculate_photon_x_y_t_on_screen(
         focus_depth=dum["camera"]["focus_depth_m"],
         focal_length=dum["mirror"]["focal_length_m"],
-        cx_Tpap=cer_Tpap[:, BUNCH.CX],
-        cy_Tpap=cer_Tpap[:, BUNCH.CY],
-        x_Tpap=cer_Tpap[:, BUNCH.X] * m_over_cm,
-        y_Tpap=cer_Tpap[:, BUNCH.Y] * m_over_cm,
-        t_Tpap=cer_Tpap[:, BUNCH.TIME] * s_over_ns,
+        cx_Tpap=cer_Tpap[:, BUNCH.CX_RAD],
+        cy_Tpap=cer_Tpap[:, BUNCH.CY_RAD],
+        x_Tpap=cer_Tpap[:, BUNCH.X_CM] * m_over_cm,
+        y_Tpap=cer_Tpap[:, BUNCH.Y_CM] * m_over_cm,
+        t_Tpap=cer_Tpap[:, BUNCH.TIME_NS] * s_over_ns,
         speed_of_light=speed_of_light_m_per_s,
     )
 
@@ -250,12 +286,12 @@ def tandeg(a):
 
 
 def estimate_rate_in_trigger_pixel_from_night_sky_background(
-    dummy_instrument,
+    instrument,
     background_wavelength_m,
     background_differential_flux_per_m2_per_sr_per_s_per_m,
     num_wavelength_steps=1337,
 ):
-    dum = dummy_instrument
+    dum = instrument
 
     common_wavelength_bin = binning_utils.Binning(
         bin_edges=np.linspace(240e-9, 700e-9, num_wavelength_steps + 1)
@@ -310,16 +346,16 @@ def evaluate_by_wavelength(
 
 
 def get_cherenkov_bunches_which_cause_response(
-    cherenkov_bunches_Tpap, dummy_instrument, prng,
+    cherenkov_bunches_Tpap, instrument, prng,
 ):
-    dum = dummy_instrument
+    dum = instrument
     cer = cherenkov_bunches_Tpap
 
     # remove bunches outside of mirror
     # --------------------------------
     m_over_cm = 1e-2
-    cer_x_m = m_over_cm * cer[:, BUNCH.X]
-    cer_y_m = m_over_cm * cer[:, BUNCH.Y]
+    cer_x_m = m_over_cm * cer[:, BUNCH.X_CM]
+    cer_y_m = m_over_cm * cer[:, BUNCH.Y_CM]
 
     bunch_r2_m2 = cer_x_m ** 2 + cer_y_m ** 2
     mirror_r2_m2 = (0.5 * dum["mirror"]["diameter_m"]) ** 2
@@ -328,12 +364,13 @@ def get_cherenkov_bunches_which_cause_response(
 
     # remove bunches (atmosphere, mirror, photo-sensor)
     # -------------------------------------------------
-    p_passing_atmosphere = cer[:, BUNCH.BSIZE]
+    p_passing_atmosphere = cer[:, BUNCH.BUNCH_SIZE_1]
     assert np.all(p_passing_atmosphere <= 1.0)
     assert np.all(p_passing_atmosphere >= 0.0)
 
+    m_over_nm = 1e-9
     p_reflected_by_mirror = evaluate_by_wavelength(
-        photon_wavelength_m=1e-9 * cer[:, BUNCH.WVL],
+        photon_wavelength_m=m_over_nm * cer[:, BUNCH.WAVELENGTH_NM],
         function_wavelength_m=dum["mirror"]["reflectivity"]["wavelength_m"],
         function_value=dum["mirror"]["reflectivity"]["value"],
     )
@@ -341,7 +378,7 @@ def get_cherenkov_bunches_which_cause_response(
     assert np.all(p_reflected_by_mirror >= 0.0)
 
     p_detected_by_photo_sensor = evaluate_by_wavelength(
-        photon_wavelength_m=1e-9 * cer[:, BUNCH.WVL],
+        photon_wavelength_m=m_over_nm * cer[:, BUNCH.WAVELENGTH_NM],
         function_wavelength_m=dum["camera"]["efficiency"]["wavelength_m"],
         function_value=dum["camera"]["efficiency"]["value"],
     )
@@ -518,6 +555,24 @@ def bin_t_into_time_slice(t_Tscreen, time_bin_edges):
     return tslice_i
 
 
+def make_trigger_pixel_summation(x_y_pixel_tree, radius):
+    summation = {}
+    num_pixel = x_y_pixel_tree.data.shape[0]
+    for i in range(num_pixel):
+        x_y = x_y_pixel_tree.data[i]
+        summation[i] = x_y_pixel_tree.query_ball_point(x=x_y, r=radius)
+    return summation
+
+
+def make_trigger_image(camera_response, trigger_pixel_summation):
+    trgimg = np.zeros(shape=camera_response.shape)
+    num_pixel = camera_response.shape[1]
+    for i in range(num_pixel):
+        for j in trigger_pixel_summation[i]:
+            trgimg[:, i] += camera_response[:, j]
+    return trgimg
+
+
 def make_cherenkov_bunches(
     prng,
     size=1000,
@@ -567,12 +622,14 @@ def make_cherenkov_bunches(
 
     # x/cm, y/cm, cx/1, cy/1, time/ns, zem/cm, bsize/1, wvl/nm
     # --------------------------------------------------------
-    cer[:, BUNCH.X] = mirror_impacts_x * cm_over_m
-    cer[:, BUNCH.Y] = mirror_impacts_y * cm_over_m
-    cer[:, BUNCH.CX] = cxcycz[:, 0]
-    cer[:, BUNCH.CY] = cxcycz[:, 1]
-    cer[:, BUNCH.TIME] = times * ns_over_s
-    cer[:, BUNCH.ZEM] = np.ones(size) * emission_point_m[2] * cm_over_m
-    cer[:, BUNCH.BSIZE] = np.ones(size) * bunch_size
-    cer[:, BUNCH.WVL] = np.ones(size) * wavelength_m * nm_over_m
+    cer[:, BUNCH.X_CM] = mirror_impacts_x * cm_over_m
+    cer[:, BUNCH.Y_CM] = mirror_impacts_y * cm_over_m
+    cer[:, BUNCH.CX_RAD] = cxcycz[:, 0]
+    cer[:, BUNCH.CY_RAD] = cxcycz[:, 1]
+    cer[:, BUNCH.TIME_NS] = times * ns_over_s
+    cer[:, BUNCH.EMISSOION_ALTITUDE_ASL_CM] = (
+        np.ones(size) * emission_point_m[2] * cm_over_m
+    )
+    cer[:, BUNCH.BUNCH_SIZE_1] = np.ones(size) * bunch_size
+    cer[:, BUNCH.WAVELENGTH_NM] = np.ones(size) * wavelength_m * nm_over_m
     return cer
