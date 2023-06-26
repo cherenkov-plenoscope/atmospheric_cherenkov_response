@@ -5,7 +5,7 @@ import solid_angle_utils
 import plenopy
 from optic_object_wavefronts.geometry.grid import hexagonal as hexgrid
 from corsika_primary.I import BUNCH
-from .. import night_sky_background
+from ... import night_sky_background
 import scipy
 from scipy import spatial
 
@@ -169,8 +169,13 @@ def estimate_response_to_night_sky_background(prng, dummy_instrument):
 def draw_night_sky_background(
     prng, num_time_slices, num_pixel, time_slice_duration_s, rate_per_s
 ):
+    """
+    This is only okayish for a toy-simulation. Oversimplified to speed up
+    computations.
+    Use expovariate for actual statistics.
+    """
     mean = rate_per_s * time_slice_duration_s
-    assert mean > 10
+    assert mean > 10  # only okayish when rate is 'high' enough.
     std = np.sqrt(mean)
     size = num_time_slices * num_pixel
     nnn = np.round(prng.normal(loc=mean, scale=std, size=size))
@@ -521,6 +526,15 @@ def make_cherenkov_bunches(
     bunch_size=1.0,
     mirror_radius_m=10,
 ):
+    """
+    Returns the light of a point-source at 'emission_point_m' which shines
+    its light uniformly (only valid when emission_point_m[z] is large) onto
+    a disk with the 'mirror_radius_m'.
+    All photon are emitted at the same moment.
+
+    This is intended for testing. Actual cherenkov-bunches are computed with
+    CORSIKA.
+    """
     cer = []
 
     cm_over_m = 1e2
