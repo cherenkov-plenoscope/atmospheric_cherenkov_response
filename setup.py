@@ -4,7 +4,7 @@ with open("README.rst", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="atmospheric_cherenkov_response",
+    name="atmospheric_cherenkov_response_sebastian-achim-mueller",
     version="0.0.1",
     description="Estimate response-functions for the atmospheric Cherenkov-method",
     long_description=long_description,
