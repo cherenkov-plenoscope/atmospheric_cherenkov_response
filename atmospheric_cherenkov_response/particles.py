@@ -1,5 +1,129 @@
 import numpy as np
 import corsika_primary
+import binning_utils
+
+
+def _all():
+    par = {}
+
+    ebin_GeV = binning_utils.power10.lower_bin_edge
+    stop_GeV = ebin_GeV(decade=3, bin=2, num_bins_per_decade=5)
+
+    stop_GeV = {
+        "repr": "binning",
+        "decade": 3,
+        "bin": 2,
+        "num_bins_per_decade": 5,
+    }
+
+    par["gamma"] = {
+        "corsika_particle_id": 1,
+        "electric_charge_qe": 0.0,
+        "magnetic_deflection": {"max_acceptable_off_axis_angle_deg": 0.25},
+        "population": {
+            "energy": {
+                "start_GeV": {
+                    "repr": "binning",
+                    "decade": -1,
+                    "bin": 2,
+                    "num_bins_per_decade": 5,
+                },
+                "stop_GeV": stop_GeV,
+                "power_law_slope": -1.5,
+            },
+            "direction": {"scatter_cone_half_angle_deg": 3.25},
+        },
+        "plotting": {"color": "black", "label": "gamma-ray"},
+    }
+
+    par["electron"] = {
+        "corsika_particle_id": 3,
+        "electric_charge_qe": -1.0,
+        "magnetic_deflection": {"max_acceptable_off_axis_angle_deg": 0.5},
+        "population": {
+            "energy": {
+                "start_GeV": {
+                    "repr": "binning",
+                    "decade": -1,
+                    "bin": 3,
+                    "num_bins_per_decade": 5,
+                },
+                "stop_GeV": stop_GeV,
+                "power_law_slope": -1.5,
+            },
+            "direction": {"scatter_cone_half_angle_deg": 6.5},
+        },
+        "plotting": {"color": "blue", "label": "electron",},
+    }
+
+    MIN_PROTON_ENERGY_GEV = 5.0
+    par["proton"] = {
+        "corsika_particle_id": 14,
+        "electric_charge_qe": +1.0,
+        "magnetic_deflection": {"max_acceptable_off_axis_angle_deg": 1.5},
+        "population": {
+            "energy": {
+                "start_GeV": {
+                    "repr": "explicit",
+                    "value": MIN_PROTON_ENERGY_GEV,
+                },
+                "stop_GeV": stop_GeV,
+                "power_law_slope": -1.5,
+            },
+            "direction": {"scatter_cone_half_angle_deg": 18.3},
+        },
+        "plotting": {"color": "red", "label": "proton",},
+    }
+
+    MIN_HELIUM_ENERGY_GEV = 10.0
+    par["helium"] = {
+        "corsika_particle_id": 402,
+        "electric_charge_qe": +2.0,
+        "magnetic_deflection": {"max_acceptable_off_axis_angle_deg": 1.5},
+        "population": {
+            "energy": {
+                "start_GeV": {
+                    "repr": "explicit",
+                    "value": MIN_HELIUM_ENERGY_GEV,
+                },
+                "stop_GeV": stop_GeV,
+                "power_law_slope": -1.5,
+            },
+            "direction": {"scatter_cone_half_angle_deg": 18.3},
+        },
+        "plotting": {"color": "red", "label": "proton",},
+    }
+
+    # assert all have same keys
+    # -------------------------
+    for pk in par:
+        for key in par[pk]:
+            assert (
+                key in par["gamma"]
+            ), "The key '{:s}' from '{:s}' not in 'gamma'".format(key, pk)
+        for key in par["gamma"]:
+            assert key in par[pk], "{:s} not in '{:s}'".format(key, pk)
+
+    return par
+
+
+def list_particles():
+    return list(_all().keys())
+
+
+def init_particle(key):
+    return _all()[key]
+
+
+def compile_energy(energy):
+    _ecpy = energy.copy()
+    _repr = _ecpy.pop("repr")
+    if _repr == "explicit":
+        return energy["value"]
+    elif _repr == "binning":
+        return binning_utils.power10.lower_bin_edge(**_ecpy)
+    else:
+        raise KeyError()
 
 
 def _assert_deflection(site_particle_deflection):
@@ -27,28 +151,31 @@ def _assert_deflection(site_particle_deflection):
 
 
 def _assert_site(site):
-    required_keys = [
-        "observation_level_asl_m",
-        "earth_magnetic_field_x_muT",
-        "earth_magnetic_field_z_muT",
-        "atmosphere_id",
-    ]
-    for required_key in required_keys:
-        assert required_key in site
+    assert (
+        site["observation_level_asl_m"] >= -500
+    )  # already unreasonable, but hey!
+    assert site["corsika_atmosphere_id"] >= 0
+    assert not np.isnan(float(site["earth_magnetic_field_x_muT"]))
+    assert not np.isnan(float(site["earth_magnetic_field_z_muT"]))
 
 
 def _assert_particle(particle):
-    required_keys = [
-        "particle_id",
-        "energy_bin_edges_GeV",
-        "max_scatter_angle_deg",
-        "energy_power_law_slope",
-    ]
-    for required_key in required_keys:
-        assert required_key in particle
+    assert particle["corsika_particle_id"] >= 0
+    assert (
+        particle["population"]["direction"]["scatter_cone_half_angle_deg"]
+        >= 0.0
+    )
+    assert compile_energy(particle["population"]["energy"]["start_GeV"]) > 0.0
+    assert compile_energy(particle["population"]["energy"]["stop_GeV"]) > 0.0
 
-    assert np.all(np.diff(particle["energy_bin_edges_GeV"]) >= 0)
-    assert len(particle["energy_bin_edges_GeV"]) == 2
+
+EXAMPLE_SITE_PARTICLE_DEFLECTION = {
+    "particle_energy_GeV": [5, 1000],
+    "particle_azimuth_deg": [0.0, 0.0],
+    "particle_zenith_deg": [0.0, 0.0],
+    "cherenkov_x_m": [0.0, 0.0],
+    "cherenkov_y_m": [0.0, 0.0],
+}
 
 
 def draw_corsika_primary_steering(
@@ -90,21 +217,25 @@ def draw_corsika_primary_steering(
     _assert_deflection(site_particle_deflection)
     assert num_events > 0
 
-    max_scatter_rad = np.deg2rad(particle["max_scatter_angle_deg"])
+    max_scatter_rad = np.deg2rad(
+        particle["population"]["direction"]["scatter_cone_half_angle_deg"]
+    )
 
     start_energy_GeV = np.max(
         [
-            np.min(particle["energy_bin_edges_GeV"]),
+            compile_energy(particle["population"]["energy"]["start_GeV"]),
             np.min(site_particle_deflection["particle_energy_GeV"]),
         ]
     )
-    stop_energy_GeV = np.max(particle["energy_bin_edges_GeV"])
+    stop_energy_GeV = compile_energy(
+        particle["population"]["energy"]["stop_GeV"]
+    )
 
     energies_GeV = corsika_primary.random.distributions.draw_power_law(
         prng=prng,
         lower_limit=start_energy_GeV,
         upper_limit=stop_energy_GeV,
-        power_slope=particle["energy_power_law_slope"],
+        power_slope=particle["population"]["energy"]["power_law_slope"],
         num_samples=num_events,
     )
 
@@ -117,7 +248,7 @@ def draw_corsika_primary_steering(
         "observation_level_asl_m": f8(site["observation_level_asl_m"]),
         "earth_magnetic_field_x_muT": f8(site["earth_magnetic_field_x_muT"]),
         "earth_magnetic_field_z_muT": f8(site["earth_magnetic_field_z_muT"]),
-        "atmosphere_id": i8(site["atmosphere_id"]),
+        "atmosphere_id": i8(site["corsika_atmosphere_id"]),
         "energy_range": {
             "start_GeV": f8(start_energy_GeV),
             "stop_GeV": f8(stop_energy_GeV),
@@ -128,7 +259,7 @@ def draw_corsika_primary_steering(
     primaries = []
     for e in range(num_events):
         prm = {}
-        prm["particle_id"] = f8(particle["particle_id"])
+        prm["particle_id"] = f8(particle["corsika_particle_id"])
         prm["energy_GeV"] = f8(energies_GeV[e])
         prm["magnet_azimuth_rad"] = np.deg2rad(
             np.interp(
