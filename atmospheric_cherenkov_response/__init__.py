@@ -5,3 +5,4 @@ from . import demonstration
 from . import night_sky_background
 from . import particles
 from . import sites
+from . import pointing
