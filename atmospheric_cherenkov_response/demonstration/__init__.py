@@ -4,6 +4,9 @@ import json_numpy
 import os
 import magnetic_deflection
 import json_line_logger
+from .. import pointing
+from .. import sites
+from .. import particles
 
 
 GRID = {
@@ -19,12 +22,12 @@ def init(work_dir, config=None):
     if config == None:
         config = {
             "corsika": magnetic_deflection.examples.CORSIKA_PRIMARY_MOD_PATH,
-            "particles": magnetic_deflection.examples.PARTICLES,
-            "sites": magnetic_deflection.examples.SITES,
+            "particles": particles._all(),
+            "sites": sites._all(),
             "pointings": [
-                {"azimuth_deg": 0.0, "zenith_deg": 0.0},
-                {"azimuth_deg": 0.0, "zenith_deg": 22.5},
-                {"azimuth_deg": 0.0, "zenith_deg": 45.0},
+                pointing.init_pointing(azimuth_deg=0.0, zenith_deg=0.0),
+                pointing.init_pointing(azimuth_deg=0.0, zenith_deg=22.5),
+                pointing.init_pointing(azimuth_deg=0.0, zenith_deg=45.0),
             ],
             "magnetic_deflection": {
                 "num_energy_supports": 512,
@@ -52,15 +55,15 @@ def run(work_dir, pool, logger=json_line_logger.LoggerStdout()):
     # --------------------
 
     jobs = []
-    for pointing in config["pointings"]:
-        pointing_key = make_pointing_key(pointing)
-        pointing_dir = os.path.join(work_dir, "map", pointing_key)
+    for ptg in config["pointings"]:
+        ptg_key = pointing.make_pointing_key(ptg)
+        ptg_dir = os.path.join(work_dir, "map", ptg_key)
 
-        if not os.path.exists(pointing_dir):
-            logger.info("Adding magnetic-deflection for " + pointing_key)
+        if not os.path.exists(ptg_dir):
+            logger.info("Adding magnetic-deflection for " + ptg_key)
 
             magnetic_deflection.init(
-                work_dir=pointing_dir,
+                work_dir=ptg_dir,
                 particles=config["particles"],
                 sites=config["sites"],
                 pointing=pointing,
@@ -70,7 +73,7 @@ def run(work_dir, pool, logger=json_line_logger.LoggerStdout()):
                 ],
             )
 
-            jobs += magnetic_deflection.make_jobs(work_dir=pointing_dir)
+            jobs += magnetic_deflection.make_jobs(work_dir=ptg_dir)
 
     if len(jobs):
         logger.info(
@@ -79,20 +82,14 @@ def run(work_dir, pool, logger=json_line_logger.LoggerStdout()):
 
     _ = pool.map(magnetic_deflection.map_and_reduce.run_job, jobs)
 
-    for pointing in config["pointings"]:
-        pointing_key = make_pointing_key(pointing)
-        pointing_dir = os.path.join(work_dir, "map", pointing_key)
+    for ptg in config["pointings"]:
+        ptg_key = make_pointing_key(ptg)
+        ptg_dir = os.path.join(work_dir, "map", ptg_key)
 
         try:
             _ = magnetic_deflection.read_deflection(
-                work_dir=pointing_dir, style="dict",
+                work_dir=ptg_dir, style="dict",
             )
         except:
-            logger.info("Reducing magnetic-deflection " + pointing_key)
-            magnetic_deflection.reduce(work_dir=pointing_dir, logger=logger)
-
-
-def make_pointing_key(pointing):
-    return "az{:06d}mdeg_zd{:06d}mdeg".format(
-        int(pointing["azimuth_deg"] * 1e3), int(pointing["zenith_deg"] * 1e3),
-    )
+            logger.info("Reducing magnetic-deflection " + ptg_key)
+            magnetic_deflection.reduce(work_dir=ptg_dir, logger=logger)
