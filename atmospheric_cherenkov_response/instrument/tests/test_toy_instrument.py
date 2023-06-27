@@ -330,17 +330,17 @@ def test_make_cherenkov_bunches():
     )
 
     assert len(cer) == 1337
-    assert approx(np.mean(cer[:, BUNCH.X]), 0.0, eps=10)  # cm
-    assert approx(np.mean(cer[:, BUNCH.Y]), 0.0, eps=10)  # cm
+    assert approx(np.mean(cer[:, BUNCH.X_CM]), 0.0, eps=10)  # cm
+    assert approx(np.mean(cer[:, BUNCH.Y_CM]), 0.0, eps=10)  # cm
 
-    assert d2r(0.02) < np.std(cer[:, BUNCH.CX]) < d2r(0.1)  # rad
-    assert d2r(0.02) < np.std(cer[:, BUNCH.CY]) < d2r(0.1)  # rad
+    assert d2r(0.02) < np.std(cer[:, BUNCH.CX_RAD]) < d2r(0.1)  # rad
+    assert d2r(0.02) < np.std(cer[:, BUNCH.CY_RAD]) < d2r(0.1)  # rad
 
-    assert np.std(cer[:, BUNCH.TIME]) < 1  # ns
+    assert np.std(cer[:, BUNCH.TIME_NS]) < 1  # ns
 
-    assert np.all(cer[:, BUNCH.ZEM] == 1e4 * 1e2)  # cm
-    assert np.all(cer[:, BUNCH.BSIZE] == 1.0)
-    assert np.all(cer[:, BUNCH.WVL] == 433)
+    assert np.all(cer[:, BUNCH.EMISSOION_ALTITUDE_ASL_CM] == 1e4 * 1e2)  # cm
+    assert np.all(cer[:, BUNCH.BUNCH_SIZE_1] == 1.0)
+    assert np.all(cer[:, BUNCH.WAVELENGTH_NM] == 433)
 
 
 def test_response():

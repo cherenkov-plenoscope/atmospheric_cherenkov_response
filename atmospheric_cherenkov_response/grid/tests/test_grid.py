@@ -29,28 +29,28 @@ def make_cherenkov_bunches(
     num_bunches,
 ):
     cherenkov_bunches = np.zeros(shape=(num_bunches, 8))
-    cherenkov_bunches[:, cpw.I.BUNCH.X] = prng.normal(
+    cherenkov_bunches[:, cpw.I.BUNCH.X_CM] = prng.normal(
         loc=x_m * cpw.M2CM, scale=x_std_m * cpw.M2CM, size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.Y] = prng.normal(
+    cherenkov_bunches[:, cpw.I.BUNCH.Y_CM] = prng.normal(
         loc=y_m * cpw.M2CM, scale=y_std_m * cpw.M2CM, size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.CX] = prng.normal(
+    cherenkov_bunches[:, cpw.I.BUNCH.CX_RAD] = prng.normal(
         loc=np.deg2rad(cx_deg), scale=np.deg2rad(cx_std_deg), size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.CY] = prng.normal(
+    cherenkov_bunches[:, cpw.I.BUNCH.CY_RAD] = prng.normal(
         loc=np.deg2rad(cy_deg), scale=np.deg2rad(cy_std_deg), size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.TIME] = prng.normal(
+    cherenkov_bunches[:, cpw.I.BUNCH.TIME_NS] = prng.normal(
         loc=100e-6, scale=10e-9, size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.ZEM] = prng.uniform(
+    cherenkov_bunches[:, cpw.I.BUNCH.EMISSOION_ALTITUDE_ASL_CM] = prng.uniform(
         low=1e3 * cpw.M2CM, high=1e4 * cpw.M2CM, size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.BSIZE] = prng.uniform(
+    cherenkov_bunches[:, cpw.I.BUNCH.BUNCH_SIZE_1] = prng.uniform(
         low=0.9, high=1.0, size=num_bunches
     )
-    cherenkov_bunches[:, cpw.I.BUNCH.WVL] = prng.uniform(
+    cherenkov_bunches[:, cpw.I.BUNCH.WAVELENGTH_NM] = prng.uniform(
         low=250e-9, high=700e-9, size=num_bunches
     )
     return cherenkov_bunches
@@ -229,10 +229,10 @@ def test_shower_x_moves_not_counteracted():
 
         cherenkov_wrt_plenoscope = result["random_choice"]["cherenkov_bunches"]
         x_wrt_plenoscope_m = (
-            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.X] * cpw.CM2M
+            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.X_CM] * cpw.CM2M
         )
         y_wrt_plenoscope_m = (
-            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.Y] * cpw.CM2M
+            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.Y_CM] * cpw.CM2M
         )
 
         median_x_wrt_plenoscope_m = np.median(x_wrt_plenoscope_m)
@@ -306,10 +306,10 @@ def test_shower_x_moves_but_counteracted():
 
         cherenkov_wrt_plenoscope = result["random_choice"]["cherenkov_bunches"]
         x_wrt_plenoscope_m = (
-            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.X] * cpw.CM2M
+            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.X_CM] * cpw.CM2M
         )
         y_wrt_plenoscope_m = (
-            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.Y] * cpw.CM2M
+            cherenkov_wrt_plenoscope[:, cpw.I.BUNCH.Y_CM] * cpw.CM2M
         )
 
         median_x_wrt_plenoscope_m = np.median(x_wrt_plenoscope_m)

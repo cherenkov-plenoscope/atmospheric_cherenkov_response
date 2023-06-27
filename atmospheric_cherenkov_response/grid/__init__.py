@@ -96,8 +96,8 @@ def cut_cherenkov_bunches_in_field_of_view(
     cherenkov_bunches, field_of_view_radius_deg, pointing_direction,
 ):
     bunch_directions = _make_bunch_direction(
-        cx=cherenkov_bunches[:, cpw.I.BUNCH.CX],
-        cy=cherenkov_bunches[:, cpw.I.BUNCH.CY],
+        cx=cherenkov_bunches[:, cpw.I.BUNCH.CX_RAD],
+        cy=cherenkov_bunches[:, cpw.I.BUNCH.CY_RAD],
     )
     bunch_incidents = -1.0 * bunch_directions
     angle_bunch_pointing = _make_angle_between(
@@ -156,9 +156,9 @@ def assign(
     # --------
     CM2M = 1e-2
     M2CM = 1e2
-    bunch_x_wrt_grid_m = CM2M * bunches_in_fov[:, cpw.I.BUNCH.X] + shift_x
-    bunch_y_wrt_grid_m = CM2M * bunches_in_fov[:, cpw.I.BUNCH.Y] + shift_y
-    bunch_weight = bunches_in_fov[:, cpw.I.BUNCH.BSIZE]
+    bunch_x_wrt_grid_m = CM2M * bunches_in_fov[:, cpw.I.BUNCH.X_CM] + shift_x
+    bunch_y_wrt_grid_m = CM2M * bunches_in_fov[:, cpw.I.BUNCH.Y_CM] + shift_y
+    bunch_weight = bunches_in_fov[:, cpw.I.BUNCH.BUNCH_SIZE_1]
 
     (
         grid_histogram,
@@ -198,7 +198,7 @@ def assign(
         match_bin_idx_y = bunch_y_bin_idxs - 1 == bin_idx_y
         match_bin = np.logical_and(match_bin_idx_x, match_bin_idx_y)
         num_photons_in_recovered_bin = np.sum(
-            bunches_in_fov[match_bin, cpw.I.BUNCH.BSIZE]
+            bunches_in_fov[match_bin, cpw.I.BUNCH.BUNCH_SIZE_1]
         )
         abs_diff_num_photons = np.abs(
             num_photons_in_recovered_bin - num_photons_in_bin
@@ -220,10 +220,10 @@ def assign(
             )
             assert False, msg
         choice["cherenkov_bunches"] = bunches_in_fov[match_bin, :].copy()
-        choice["cherenkov_bunches"][:, cpw.I.BUNCH.X] -= (
+        choice["cherenkov_bunches"][:, cpw.I.BUNCH.X_CM] -= (
             M2CM * choice["core_x_m"]
         )
-        choice["cherenkov_bunches"][:, cpw.I.BUNCH.Y] -= (
+        choice["cherenkov_bunches"][:, cpw.I.BUNCH.Y_CM] -= (
             M2CM * choice["core_y_m"]
         )
 
