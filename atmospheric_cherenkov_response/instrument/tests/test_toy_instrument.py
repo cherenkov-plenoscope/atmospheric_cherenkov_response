@@ -214,7 +214,7 @@ def test_get_cherenkov_bunches_which_cause_response_in_dummy_instrument():
         for i in range(NN):
             cer = acr.instrument.toy.get_cherenkov_bunches_which_cause_response(
                 cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
-                dummy_instrument=toy,
+                instrument=toy,
                 prng=prng,
             )
             nn += len(cer)
@@ -258,7 +258,7 @@ def test_mirror():
 
     cer = acr.instrument.toy.get_cherenkov_bunches_which_cause_response(
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
-        dummy_instrument=toy,
+        instrument=toy,
         prng=prng,
     )
 
@@ -364,9 +364,9 @@ def test_response():
         focus_depth_m=emission_depth_m
     )
 
-    resi, truth = acr.instrument.toy.estimate_response_to_cherenkov(
+    resi, truth = acr.instrument.toy.estimate_camera_response_to_cherenkov(
         prng=prng,
-        dummy_instrument=portal_in_focus,
+        instrument=portal_in_focus,
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
     )
 
