@@ -1,5 +1,6 @@
 import numpy as np
 import homogeneous_transformation
+from .. import pointing
 
 EXAMPLE = {
     "half_angle_deg": 3.25,
@@ -40,7 +41,7 @@ def make_direction_on_edge_of_viewcone_when_viewcone_pointing(
         viewcone_half_angle_deg=viewcone_half_angle_deg,
     )
 
-    rot_civil = pointing_to_civil_rotation(
+    rot_civil = pointing.make_civil_rotation_for_altitude_azimuth_mount(
         azimuth_deg=pointing_azimuth_deg, zenith_deg=pointing_zenith_deg,
     )
     t_civil = {
