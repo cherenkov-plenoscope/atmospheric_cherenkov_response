@@ -32,9 +32,7 @@ def init_civil_rotation_of_principal_aperture_plane(pointing, mount):
         raise KeyError("No such mount: '{:s}'".format(mount))
 
 
-def make_civil_rotation_for_altitude_azimuth_mount(
-    azimuth_deg, zenith_deg
-):
+def make_civil_rotation_for_altitude_azimuth_mount(azimuth_deg, zenith_deg):
     """
     x-axis is magnetic north where azimuth is 0deg.
     z-axis goes up.

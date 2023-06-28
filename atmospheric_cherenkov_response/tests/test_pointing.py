@@ -30,7 +30,9 @@ def transform_xyz_altitude_azimuth_mount(pointing):
 
 
 def test_altitude_azimuth_mount():
-    x, y, z = transform_xyz_altitude_azimuth_mount(acr.pointing.init(azimuth_deg=0.0, zenith_deg=0.0))
+    x, y, z = transform_xyz_altitude_azimuth_mount(
+        acr.pointing.init(azimuth_deg=0.0, zenith_deg=0.0)
+    )
     assert_close(x, [1, 0, 0])
     assert_close(x, [1, 0, 0])
     assert_close(x, [1, 0, 0])

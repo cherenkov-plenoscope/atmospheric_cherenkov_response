@@ -405,6 +405,7 @@ def test_response():
 
     if False:
         from atmospheric_cherenkov_response.instrument.toy import plot
+
         acr.instrument.toy.plot.plot_response(
             path="portal_in_focus.jpg",
             toy_instrument=portal_in_focus,
