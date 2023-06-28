@@ -382,22 +382,15 @@ def test_response():
 
     img_resi = np.sum(resi, axis=0)
     assert 0 < np.sum(img_resi > 0) < 5
-
-    # acr.instrument.plot.plot_response(
-    #    path="portal_in_focus.jpg",
-    #    toy_instrument=portal_in_focus,
-    #    response=resi,
-    # )
-
     assert len(cherenkov_bunches_Tpap) == num_cer
 
     # out of focus
     # ------------
     portal_out_of_focus = acr.instrument.toy.init_portal(focus_depth_m=3e3)
 
-    reso, truth = acr.instrument.toy.estimate_response_to_cherenkov(
+    reso, truth = acr.instrument.toy.estimate_camera_response_to_cherenkov(
         prng=prng,
-        dummy_instrument=portal_out_of_focus,
+        instrument=portal_out_of_focus,
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
     )
 
@@ -408,10 +401,17 @@ def test_response():
     assert np.sum(time_reso > 0) < 3
 
     img_reso = np.sum(reso, axis=0)
-    assert 30 < np.sum(img_reso > 0) < 60
+    assert 200 < np.sum(img_reso > 0) < 300
 
-    # acr.instrument.plot.plot_response(
-    #    path="portal_out_of_focus.jpg",
-    #    toy_instrument=portal_out_of_focus,
-    #    response=reso,
-    # )
+    if False:
+        from atmospheric_cherenkov_response.instrument.toy import plot
+        acr.instrument.toy.plot.plot_response(
+            path="portal_in_focus.jpg",
+            toy_instrument=portal_in_focus,
+            response=resi,
+        )
+        acr.instrument.toy.plot.plot_response(
+            path="portal_out_of_focus.jpg",
+            toy_instrument=portal_out_of_focus,
+            response=reso,
+        )
