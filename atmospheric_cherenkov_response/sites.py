@@ -59,9 +59,9 @@ def _all():
     return sites
 
 
-def list_sites():
+def keys():
     return list(_all().keys())
 
 
-def init_site(key):
+def init(key):
     return _all()[key]

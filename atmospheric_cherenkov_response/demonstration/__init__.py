@@ -25,9 +25,9 @@ def init(work_dir, config=None):
             "particles": particles._all(),
             "sites": sites._all(),
             "pointings": [
-                pointing.init_pointing(azimuth_deg=0.0, zenith_deg=0.0),
-                pointing.init_pointing(azimuth_deg=0.0, zenith_deg=22.5),
-                pointing.init_pointing(azimuth_deg=0.0, zenith_deg=45.0),
+                pointing.init(azimuth_deg=0.0, zenith_deg=0.0),
+                pointing.init(azimuth_deg=0.0, zenith_deg=22.5),
+                pointing.init(azimuth_deg=0.0, zenith_deg=45.0),
             ],
             "magnetic_deflection": {
                 "num_energy_supports": 512,

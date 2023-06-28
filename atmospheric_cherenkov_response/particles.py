@@ -107,11 +107,11 @@ def _all():
     return par
 
 
-def list_particles():
+def keys():
     return list(_all().keys())
 
 
-def init_particle(key):
+def init(key):
     return _all()[key]
 
 
