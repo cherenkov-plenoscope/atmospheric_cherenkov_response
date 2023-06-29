@@ -4,71 +4,113 @@ import json_numpy
 import os
 import magnetic_deflection
 import json_line_logger
+import network_file_system as nfs
 from .. import pointing
 from .. import sites
 from .. import particles
-
-
-GRID = {
-    "num_bins_radius": 512,
-    "threshold_num_photons": 50,
-    "field_of_view_overhead": 1.1,
-    "bin_width_overhead": 1.1,
-    "output_after_num_events": 25,
-}
+from .. import grid
 
 
 def init(work_dir, config=None):
+    join = os.path.join
     if config == None:
-        config = {
-            "corsika": magnetic_deflection.examples.CORSIKA_PRIMARY_MOD_PATH,
-            "particles": particles._all(),
-            "sites": sites._all(),
-            "pointings": [
-                pointing.init(azimuth_deg=0.0, zenith_deg=0.0),
-                pointing.init(azimuth_deg=0.0, zenith_deg=22.5),
-                pointing.init(azimuth_deg=0.0, zenith_deg=45.0),
-            ],
-            "magnetic_deflection": {
-                "num_energy_supports": 512,
-                "max_energy_GeV": 64,
-            },
-            "runs": {
-                "gamma": {"num": 64, "first_run_id": 1},
-                "electron": {"num": 64, "first_run_id": 1},
-                "proton": {"num": 64, "first_run_id": 1},
-                "helium": {"num": 64, "first_run_id": 1},
-            },
-            "num_airshowers_per_run": 100,
-            "grid": GRID,
-            "classic": {},
-        }
+        cfg_dir = join(work_dir, "config")
+        os.makedirs(cfg_dir, exist_ok=True)
 
-    with open(os.path.join(work_dir, "config.json"), "wt") as f:
-        f.write(json_numpy.dumps(config, indent=4))
+        cfg_exe_dir = join(cfg_dir, "executables")
+        os.makedirs(cfg_exe_dir, exist_ok=True)
+
+        with nfs.open(join(cfg_exe_dir, "corsika_primary.json"), "wt") as f:
+            f.write(
+                json_numpy.dumps(
+                    {
+                        "path": magnetic_deflection.examples.CORSIKA_PRIMARY_MOD_PATH
+                    },
+                    indent=4,
+                )
+            )
+
+        with nfs.open(join(cfg_dir, "sites.json"), "wt") as f:
+            f.write(json_numpy.dumps(sites._all(), indent=4))
+
+        with nfs.open(join(cfg_dir, "particles.json"), "wt") as f:
+            f.write(json_numpy.dumps(particles._all(), indent=4))
+
+        with nfs.open(join(cfg_dir, "grid.json"), "wt") as f:
+            f.write(json_numpy.dumps(grid.EXAMPLE, indent=4))
+
+        cfg_prd_dir = join(cfg_dir, "production")
+        os.makedirs(cfg_prd_dir, exist_ok=True)
+
+        with nfs.open(
+            join(cfg_prd_dir, "magnetic_deflection.json"), "wt"
+        ) as f:
+            f.write(
+                json_numpy.dumps(
+                    {"num_energy_supports": 512, "max_energy_GeV": 64,},
+                    indent=4,
+                )
+            )
+
+        with nfs.open(
+            join(cfg_prd_dir, "instrument_response.json"), "wt"
+        ) as f:
+            f.write(
+                json_numpy.dumps(
+                    {
+                        "num_airshowers_per_run": 100,
+                        "first_run_id": 1,
+                        "export_details": {"grid": {"probability": 0.01}},
+                    },
+                    indent=4,
+                )
+            )
+
+        with nfs.open(join(cfg_dir, "pointings.json"), "wt") as f:
+            f.write(
+                json_numpy.dumps(
+                    {
+                        "A": pointing.init(azimuth_deg=0.0, zenith_deg=0.0),
+                        "B": pointing.init(azimuth_deg=0.0, zenith_deg=22.5),
+                        "C": pointing.init(azimuth_deg=0.0, zenith_deg=45.0),
+                    },
+                    indent=4,
+                )
+            )
+
+        with nfs.open(join(cfg_dir, "toy.json"), "wt") as f:
+            f.write(
+                json_numpy.dumps(
+                    {
+                        "sites": sites.keys(),
+                        "particles": particles.keys(),
+                        "pointings": ["A", "B", "C"],
+                    },
+                    indent=4,
+                )
+            )
 
 
-def run(work_dir, pool, logger=json_line_logger.LoggerStdout()):
-    config = json_numpy.read(os.path.join(work_dir, "config.json"))
+def run_magnetic_deflection(work_dir, pool, logger=json_line_logger.LoggerStdout()):
+    join = os.path.join
+    config = json_numpy.read_tree(join(work_dir, "config"))
 
-    # magnetic deflections
-    # --------------------
+    mdf_dir = join(work_dir, "magnetic_deflection")
 
     jobs = []
     for ptg in config["pointings"]:
-        ptg_key = pointing.make_pointing_key(ptg)
-        ptg_dir = os.path.join(work_dir, "map", ptg_key)
+        ptg_dir = join(mdf_dir, ptg)
 
         if not os.path.exists(ptg_dir):
-            logger.info("Adding magnetic-deflection for " + ptg_key)
+            logger.info("Adding magnetic-deflection for pointing ", ptg)
 
             magnetic_deflection.init(
                 work_dir=ptg_dir,
                 particles=config["particles"],
                 sites=config["sites"],
-                pointing=pointing,
-                max_energy=config["magnetic_deflection"]["max_energy_GeV"],
-                num_energy_supports=config["magnetic_deflection"][
+                pointing=config["pointings"][ptg],
+                max_energy=config["production"]["magnetic_deflection"]["max_energy_GeV"],
+                num_energy_supports=config["production"]["magnetic_deflection"][
                     "num_energy_supports"
                 ],
             )
@@ -83,13 +125,16 @@ def run(work_dir, pool, logger=json_line_logger.LoggerStdout()):
     _ = pool.map(magnetic_deflection.map_and_reduce.run_job, jobs)
 
     for ptg in config["pointings"]:
-        ptg_key = make_pointing_key(ptg)
-        ptg_dir = os.path.join(work_dir, "map", ptg_key)
+        ptg_dir = os.path.join(mdf_dir, ptg)
 
         try:
             _ = magnetic_deflection.read_deflection(
                 work_dir=ptg_dir, style="dict",
             )
         except:
-            logger.info("Reducing magnetic-deflection " + ptg_key)
+            logger.info("Reducing magnetic-deflection for pointing " + ptg)
             magnetic_deflection.reduce(work_dir=ptg_dir, logger=logger)
+
+
+def run(work_dir, pool, logger=json_line_logger.LoggerStdout()):
+    run_magnetic_deflection(work_dir=work_dir, pool=pool, logger=logger)

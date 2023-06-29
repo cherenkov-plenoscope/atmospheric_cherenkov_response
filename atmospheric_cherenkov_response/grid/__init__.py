@@ -4,6 +4,15 @@ import numpy as np
 import corsika_primary as cpw
 
 
+EXAMPLE = {
+    "num_bins_radius": 512,
+    "threshold_num_photons": 50,
+    "field_of_view_overhead": 1.1,
+    "bin_width_overhead": 1.1,
+    "output_after_num_events": 25,
+}
+
+
 def init_geometry(
     instrument_aperture_outer_diameter,
     bin_width_overhead,
