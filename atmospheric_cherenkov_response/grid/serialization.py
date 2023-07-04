@@ -4,7 +4,7 @@ import os
 import io
 import tarfile
 import shutil
-import json_numpy
+import json_utils
 
 
 def histogram_to_bytes(img):

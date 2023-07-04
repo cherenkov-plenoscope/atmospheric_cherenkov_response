@@ -1,6 +1,6 @@
 import numpy as np
 import corsika_primary
-import json_numpy
+import json_utils
 import os
 import magnetic_deflection
 import json_line_logger
@@ -22,7 +22,7 @@ def init(work_dir, config=None):
 
         with nfs.open(join(cfg_exe_dir, "corsika_primary.json"), "wt") as f:
             f.write(
-                json_numpy.dumps(
+                json_utils.dumps(
                     {
                         "path": magnetic_deflection.examples.CORSIKA_PRIMARY_MOD_PATH
                     },
@@ -31,13 +31,13 @@ def init(work_dir, config=None):
             )
 
         with nfs.open(join(cfg_dir, "sites.json"), "wt") as f:
-            f.write(json_numpy.dumps(sites._all(), indent=4))
+            f.write(json_utils.dumps(sites._all(), indent=4))
 
         with nfs.open(join(cfg_dir, "particles.json"), "wt") as f:
-            f.write(json_numpy.dumps(particles._all(), indent=4))
+            f.write(json_utils.dumps(particles._all(), indent=4))
 
         with nfs.open(join(cfg_dir, "grid.json"), "wt") as f:
-            f.write(json_numpy.dumps(grid.EXAMPLE, indent=4))
+            f.write(json_utils.dumps(grid.EXAMPLE, indent=4))
 
         cfg_prd_dir = join(cfg_dir, "production")
         os.makedirs(cfg_prd_dir, exist_ok=True)
@@ -46,7 +46,7 @@ def init(work_dir, config=None):
             join(cfg_prd_dir, "magnetic_deflection.json"), "wt"
         ) as f:
             f.write(
-                json_numpy.dumps(
+                json_utils.dumps(
                     {"num_energy_supports": 512, "max_energy_GeV": 64,},
                     indent=4,
                 )
@@ -56,7 +56,7 @@ def init(work_dir, config=None):
             join(cfg_prd_dir, "instrument_response.json"), "wt"
         ) as f:
             f.write(
-                json_numpy.dumps(
+                json_utils.dumps(
                     {
                         "num_airshowers_per_run": 100,
                         "first_run_id": 1,
@@ -68,7 +68,7 @@ def init(work_dir, config=None):
 
         with nfs.open(join(cfg_dir, "pointings.json"), "wt") as f:
             f.write(
-                json_numpy.dumps(
+                json_utils.dumps(
                     {
                         "A": pointing.init(azimuth_deg=0.0, zenith_deg=0.0),
                         "B": pointing.init(azimuth_deg=0.0, zenith_deg=22.5),
@@ -80,7 +80,7 @@ def init(work_dir, config=None):
 
         with nfs.open(join(cfg_dir, "toy.json"), "wt") as f:
             f.write(
-                json_numpy.dumps(
+                json_utils.dumps(
                     {
                         "sites": sites.keys(),
                         "particles": particles.keys(),
@@ -93,7 +93,7 @@ def init(work_dir, config=None):
 
 def run_magnetic_deflection(work_dir, pool, logger=json_line_logger.LoggerStdout()):
     join = os.path.join
-    config = json_numpy.read_tree(join(work_dir, "config"))
+    config = json_utils.tree.read(join(work_dir, "config"))
 
     mdf_dir = join(work_dir, "magnetic_deflection")
 

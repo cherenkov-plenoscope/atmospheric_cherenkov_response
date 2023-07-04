@@ -1,5 +1,5 @@
 import numpy as np
-import json_numpy
+import json_utils
 
 
 # artificial core limitation
@@ -82,6 +82,6 @@ def apply_bin_limitation_and_warn(
             bin_idxs_above_threshold_and_in_limits[0]
         ),
     }
-    print(json_numpy.dumps(msg))
+    print(json_utils.dumps(msg))
 
     return bin_idxs_above_threshold_and_in_limits
