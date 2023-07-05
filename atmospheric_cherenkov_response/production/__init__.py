@@ -92,7 +92,9 @@ def init(work_dir, config=None):
             )
 
 
-def run_magnetic_deflection(work_dir, pool, logger=json_line_logger.LoggerStdout()):
+def run_magnetic_deflection(
+    work_dir, pool, logger=json_line_logger.LoggerStdout()
+):
     join = os.path.join
     config = json_utils.tree.read(join(work_dir, "config"))
 
@@ -110,10 +112,12 @@ def run_magnetic_deflection(work_dir, pool, logger=json_line_logger.LoggerStdout
                 particles=config["particles"],
                 sites=config["sites"],
                 pointing=config["pointings"][ptg],
-                max_energy=config["production"]["magnetic_deflection"]["max_energy_GeV"],
-                num_energy_supports=config["production"]["magnetic_deflection"][
-                    "num_energy_supports"
+                max_energy=config["production"]["magnetic_deflection"][
+                    "max_energy_GeV"
                 ],
+                num_energy_supports=config["production"][
+                    "magnetic_deflection"
+                ]["num_energy_supports"],
             )
 
             jobs += magnetic_deflection.make_jobs(work_dir=ptg_dir)

@@ -1,3 +1,6 @@
+import copy
+
+
 def _all():
     sites = {}
     sites["namibia"] = {
@@ -33,7 +36,7 @@ def _all():
         "plotting": {"label": "Roque", "marker": "^", "linestyle": "-",},
     }
 
-    sites["namibiaOff"] = sites["namibia"].copy()
+    sites["namibiaOff"] = copy.deepcopy(sites["namibia"])
     sites["namibiaOff"][
         "comment"
     ] += " Here earth's magnetic field is zero. Only for demonstration!"
