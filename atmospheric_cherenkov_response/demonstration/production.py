@@ -1,3 +1,14 @@
+from .. import sites
+from .. import particles
+import copy
+
+
+def make_example_site():
+    job = {}
+    job["site"] = copy.deepcopy(sites.init["lapalma"])
+    return job
+
+
 def make_job(
     production_key,
     run_dir,
