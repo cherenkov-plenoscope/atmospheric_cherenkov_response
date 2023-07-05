@@ -104,6 +104,11 @@ def _all():
         for key in par["gamma"]:
             assert key in par[pk], "{:s} not in '{:s}'".format(key, pk)
 
+    # put key into dict
+    # -----------------
+    for key in par:
+        par[key]["key"] = key
+
     return par
 
 

@@ -56,6 +56,11 @@ def _all():
         for key in sites["namibia"]:
             assert key in sites[sk], "{:s} not in '{:s}'".format(key, sk)
 
+    # put key into dict
+    # -----------------
+    for key in sites:
+        sites[key]["key"] = key
+
     return sites
 
 
