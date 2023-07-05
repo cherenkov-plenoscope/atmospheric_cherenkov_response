@@ -83,6 +83,14 @@ def init_geometry(
     return g
 
 
+def draw_random_shift_x_y(grid_geometry, prng):
+    return prng.uniform(
+        low=-0.5 * grid_geometry["bin_width"],
+        high=0.5 * grid_geometry["bin_width"],
+        size=2,
+    )
+
+
 def _make_bunch_direction(cx, cy):
     d = np.zeros(shape=(cx.shape[0], 3))
     d[:, 0] = cx
