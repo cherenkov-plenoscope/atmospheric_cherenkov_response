@@ -5,7 +5,7 @@ import os
 import magnetic_deflection
 import json_line_logger
 import network_file_system as nfs
-from . import job_utils
+from . import map_and_reduce
 from .. import pointing
 from .. import sites
 from .. import particles
