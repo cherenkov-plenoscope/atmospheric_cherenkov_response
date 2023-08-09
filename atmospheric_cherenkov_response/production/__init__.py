@@ -10,6 +10,7 @@ from .. import pointing
 from .. import sites
 from .. import particles
 from .. import grid
+from . import table
 
 
 def init(work_dir, config=None):
