@@ -4,7 +4,7 @@ import json_utils
 import os
 import magnetic_deflection
 import json_line_logger
-import network_file_system as nfs
+import rename_after_writing as rnw
 from . import map_and_reduce
 from .. import pointing
 from .. import sites
@@ -22,7 +22,7 @@ def init(work_dir, config=None):
         cfg_exe_dir = join(cfg_dir, "executables")
         os.makedirs(cfg_exe_dir, exist_ok=True)
 
-        with nfs.open(join(cfg_exe_dir, "corsika_primary.json"), "wt") as f:
+        with rnw.open(join(cfg_exe_dir, "corsika_primary.json"), "wt") as f:
             f.write(
                 json_utils.dumps(
                     {
@@ -32,19 +32,19 @@ def init(work_dir, config=None):
                 )
             )
 
-        with nfs.open(join(cfg_dir, "sites.json"), "wt") as f:
+        with rnw.open(join(cfg_dir, "sites.json"), "wt") as f:
             f.write(json_utils.dumps(sites._all(), indent=4))
 
-        with nfs.open(join(cfg_dir, "particles.json"), "wt") as f:
+        with rnw.open(join(cfg_dir, "particles.json"), "wt") as f:
             f.write(json_utils.dumps(particles._all(), indent=4))
 
-        with nfs.open(join(cfg_dir, "grid.json"), "wt") as f:
+        with rnw.open(join(cfg_dir, "grid.json"), "wt") as f:
             f.write(json_utils.dumps(grid.EXAMPLE, indent=4))
 
         cfg_prd_dir = join(cfg_dir, "production")
         os.makedirs(cfg_prd_dir, exist_ok=True)
 
-        with nfs.open(
+        with rnw.open(
             join(cfg_prd_dir, "magnetic_deflection.json"), "wt"
         ) as f:
             f.write(
@@ -54,7 +54,7 @@ def init(work_dir, config=None):
                 )
             )
 
-        with nfs.open(
+        with rnw.open(
             join(cfg_prd_dir, "instrument_response.json"), "wt"
         ) as f:
             f.write(
@@ -68,7 +68,7 @@ def init(work_dir, config=None):
                 )
             )
 
-        with nfs.open(join(cfg_dir, "pointings.json"), "wt") as f:
+        with rnw.open(join(cfg_dir, "pointings.json"), "wt") as f:
             f.write(
                 json_utils.dumps(
                     {
@@ -80,7 +80,7 @@ def init(work_dir, config=None):
                 )
             )
 
-        with nfs.open(join(cfg_dir, "toy.json"), "wt") as f:
+        with rnw.open(join(cfg_dir, "toy.json"), "wt") as f:
             f.write(
                 json_utils.dumps(
                     {

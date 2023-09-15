@@ -16,6 +16,7 @@ setuptools.setup(
     install_requires=[
         "homogeneous_transformation_sebastian-achim-mueller",
         "json_utils_sebastian-achim-mueller",
+        "rename_after_writing",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
