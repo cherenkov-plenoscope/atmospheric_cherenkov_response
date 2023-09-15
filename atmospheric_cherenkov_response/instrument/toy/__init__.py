@@ -186,7 +186,8 @@ def estimate_camera_response(prng, instrument, cherenkov_bunches_Tpap):
         cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
     )
     nsb, nsb_truth = estimate_camera_response_to_night_sky_background(
-        prng=prng, instrument=instrument,
+        prng=prng,
+        instrument=instrument,
     )
     res = nsb + cer
     return res, {"cherenkov": cer_truth, "night_sky_background": nsb_truth}
@@ -225,7 +226,10 @@ def draw_night_sky_background(
 
 
 def estimate_camera_response_to_cherenkov(
-    prng, instrument, cherenkov_bunches_Tpap, speed_of_light_m_per_s=299792458,
+    prng,
+    instrument,
+    cherenkov_bunches_Tpap,
+    speed_of_light_m_per_s=299792458,
 ):
     dum = instrument
 
@@ -309,10 +313,12 @@ def estimate_rate_in_trigger_pixel_from_night_sky_background(
         common_wavelength=common_wavelength_bin["centers"],
     )
 
-    q_nsb_per_m2_per_sr_per_s_per_m = photon_spectra.utils.make_values_for_common_wavelength(
-        wavelength=background_wavelength_m,
-        value=background_differential_flux_per_m2_per_sr_per_s_per_m,
-        common_wavelength=common_wavelength_bin["centers"],
+    q_nsb_per_m2_per_sr_per_s_per_m = (
+        photon_spectra.utils.make_values_for_common_wavelength(
+            wavelength=background_wavelength_m,
+            value=background_differential_flux_per_m2_per_sr_per_s_per_m,
+            common_wavelength=common_wavelength_bin["centers"],
+        )
     )
 
     # integrate
@@ -346,7 +352,9 @@ def evaluate_by_wavelength(
 
 
 def get_cherenkov_bunches_which_cause_response(
-    cherenkov_bunches_Tpap, instrument, prng,
+    cherenkov_bunches_Tpap,
+    instrument,
+    prng,
 ):
     dum = instrument
     cer = cherenkov_bunches_Tpap
@@ -357,7 +365,7 @@ def get_cherenkov_bunches_which_cause_response(
     cer_x_m = m_over_cm * cer[:, BUNCH.X_CM]
     cer_y_m = m_over_cm * cer[:, BUNCH.Y_CM]
 
-    bunch_r2_m2 = cer_x_m ** 2 + cer_y_m ** 2
+    bunch_r2_m2 = cer_x_m**2 + cer_y_m**2
     mirror_r2_m2 = (0.5 * dum["mirror"]["diameter_m"]) ** 2
     mask_on_mirror = bunch_r2_m2 <= mirror_r2_m2
     cer = cer[mask_on_mirror]
@@ -398,19 +406,21 @@ def get_cherenkov_bunches_which_cause_response(
 
 
 def make_pixel_x_y(
-    field_of_view_radius, pixel_radius,
+    field_of_view_radius,
+    pixel_radius,
 ):
     spacing = 2 * pixel_radius
     num_pixel_on_diagonal = int(
         np.ceil(2 * field_of_view_radius / pixel_radius)
     )
     grid = hexgrid.init_from_spacing(
-        spacing=spacing, fN=num_pixel_on_diagonal,
+        spacing=spacing,
+        fN=num_pixel_on_diagonal,
     )
     out = []
     for key in grid:
         ppos = grid[key]
-        if ppos[0] ** 2 + ppos[1] ** 2 <= field_of_view_radius ** 2:
+        if ppos[0] ** 2 + ppos[1] ** 2 <= field_of_view_radius**2:
             out.append(ppos)
     pos_xyz = np.array(out)
     return pos_xyz[:, 0], pos_xyz[:, 1]
@@ -496,7 +506,8 @@ def calculate_photon_x_y_t_on_screen(
     speed_of_light=299792458,
 ):
     screen_distance = plenopy.thin_lens.object_distance_2_image_distance(
-        object_distance=focus_depth, focal_length=focal_length,
+        object_distance=focus_depth,
+        focal_length=focal_length,
     )
     x_Tscreen, y_Tscreen = calculate_photon_x_y_intersections_on_screen(
         focal_length=focal_length,
@@ -507,7 +518,10 @@ def calculate_photon_x_y_t_on_screen(
         y_Tpap=y_Tpap,
     )
     dd = calculate_relative_path_length_for_isochor_imagen(
-        cx_Tpap=cx_Tpap, cy_Tpap=cy_Tpap, x_Tpap=x_Tpap, y_Tpap=y_Tpap,
+        cx_Tpap=cx_Tpap,
+        cy_Tpap=cy_Tpap,
+        x_Tpap=x_Tpap,
+        y_Tpap=y_Tpap,
     )
 
     dt = dd / speed_of_light
@@ -517,7 +531,12 @@ def calculate_photon_x_y_t_on_screen(
 
 
 def bin_x_y_t_into_pixel_and_time_slice(
-    x_Tscreen, y_Tscreen, t_Tscreen, pixel_x_y_tree, pixel_r, time_bin_edges,
+    x_Tscreen,
+    y_Tscreen,
+    t_Tscreen,
+    pixel_x_y_tree,
+    pixel_r,
+    time_bin_edges,
 ):
     px = bin_x_y_into_pixel(
         x_Tscreen=x_Tscreen,

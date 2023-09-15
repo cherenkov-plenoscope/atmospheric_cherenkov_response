@@ -33,7 +33,11 @@ def _all():
         "geomagnetic_cutoff_rigidity_GV": 10.0,
         "coordinates_wgs1984": [28.7615, -17.8906],
         "comment": "Roque de los Muchachos Observatory on La Palma, Spain",
-        "plotting": {"label": "Roque", "marker": "^", "linestyle": "-",},
+        "plotting": {
+            "label": "Roque",
+            "marker": "^",
+            "linestyle": "-",
+        },
     }
 
     sites["namibiaOff"] = copy.deepcopy(sites["namibia"])

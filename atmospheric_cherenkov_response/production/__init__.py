@@ -49,7 +49,10 @@ def init(work_dir, config=None):
         ) as f:
             f.write(
                 json_utils.dumps(
-                    {"num_energy_supports": 512, "max_energy_GeV": 64,},
+                    {
+                        "num_energy_supports": 512,
+                        "max_energy_GeV": 64,
+                    },
                     indent=4,
                 )
             )
@@ -135,7 +138,8 @@ def run_magnetic_deflection(
 
         try:
             _ = magnetic_deflection.read_deflection(
-                work_dir=ptg_dir, style="dict",
+                work_dir=ptg_dir,
+                style="dict",
             )
         except:
             logger.info("Reducing magnetic-deflection for pointing " + ptg)

@@ -10,13 +10,13 @@ def init(azimuth_deg, zenith_deg):
 
 def make_pointing_key(pointing):
     return "az{:06d}mdeg_zd{:06d}mdeg".format(
-        int(pointing["azimuth_deg"] * 1e3), int(pointing["zenith_deg"] * 1e3),
+        int(pointing["azimuth_deg"] * 1e3),
+        int(pointing["zenith_deg"] * 1e3),
     )
 
 
 def make_civil_rotation_of_principal_aperture_plane(pointing, mount):
-    """
-    """
+    """ """
     if mount == "cable_robot_mount":
         return make_civil_rotation_for_cable_robot_mount(**pointing)
     elif mount == "altitude_azimuth_mount":
@@ -45,7 +45,8 @@ def make_civil_rotation_for_cable_robot_mount(
     """
     if np.abs(zenith_deg) > eps_deg:
         rot_civil_altaz = make_civil_rotation_for_altitude_azimuth_mount(
-            azimuth_deg=azimuth_deg, zenith_deg=zenith_deg,
+            azimuth_deg=azimuth_deg,
+            zenith_deg=zenith_deg,
         )
         t_civil_altaz = {"rot": rot_civil_altaz, "pos": [0, 0, 0]}
         t_altaz = homogeneous_transformation.compile(t_civil_altaz)

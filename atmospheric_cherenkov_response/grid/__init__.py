@@ -95,12 +95,12 @@ def _make_bunch_direction(cx, cy):
     d = np.zeros(shape=(cx.shape[0], 3))
     d[:, 0] = cx
     d[:, 1] = cy
-    d[:, 2] = -1.0 * np.sqrt(1.0 - cx ** 2 - cy ** 2)
+    d[:, 2] = -1.0 * np.sqrt(1.0 - cx**2 - cy**2)
     return d
 
 
 def _normalize_rows_in_matrix(mat):
-    return mat / np.sqrt(np.sum(mat ** 2, axis=1, keepdims=1))
+    return mat / np.sqrt(np.sum(mat**2, axis=1, keepdims=1))
 
 
 def _make_angle_between(directions, direction):
@@ -110,7 +110,9 @@ def _make_angle_between(directions, direction):
 
 
 def cut_cherenkov_bunches_in_field_of_view(
-    cherenkov_bunches, field_of_view_radius_deg, pointing_direction,
+    cherenkov_bunches,
+    field_of_view_radius_deg,
+    pointing_direction,
 ):
     bunch_directions = _make_bunch_direction(
         cx=cherenkov_bunches[:, cpw.I.BUNCH.CX_RAD],

@@ -53,7 +53,10 @@ def _all():
             },
             "direction": {"scatter_cone_half_angle_deg": 6.5},
         },
-        "plotting": {"color": "blue", "label": "electron",},
+        "plotting": {
+            "color": "blue",
+            "label": "electron",
+        },
     }
 
     MIN_PROTON_ENERGY_GEV = 5.0
@@ -72,7 +75,10 @@ def _all():
             },
             "direction": {"scatter_cone_half_angle_deg": 18.3},
         },
-        "plotting": {"color": "red", "label": "proton",},
+        "plotting": {
+            "color": "red",
+            "label": "proton",
+        },
     }
 
     MIN_HELIUM_ENERGY_GEV = 10.0
@@ -91,7 +97,10 @@ def _all():
             },
             "direction": {"scatter_cone_half_angle_deg": 18.3},
         },
-        "plotting": {"color": "red", "label": "proton",},
+        "plotting": {
+            "color": "red",
+            "label": "proton",
+        },
     }
 
     # assert all have same keys
@@ -184,7 +193,12 @@ EXAMPLE_SITE_PARTICLE_DEFLECTION = {
 
 
 def draw_corsika_primary_steering(
-    run_id, site, particle, site_particle_deflection, num_events, prng,
+    run_id,
+    site,
+    particle,
+    site_particle_deflection,
+    num_events,
+    prng,
 ):
     """
     Draw the random distribution of particles to induce showers and emitt

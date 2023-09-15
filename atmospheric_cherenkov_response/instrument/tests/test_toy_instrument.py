@@ -19,7 +19,12 @@ def approx(a, b, eps=1e-6):
 
 
 def test_normalize_axis_1():
-    v = np.array([[1.0, 1, 1], [2.0, 2, 2],])
+    v = np.array(
+        [
+            [1.0, 1, 1],
+            [2.0, 2, 2],
+        ]
+    )
     vn = acr.instrument.toy.normalize_axis_1(v=v)
     assert vn.shape == v.shape
 
@@ -164,8 +169,8 @@ def test_make_pixel_x_y():
         field_of_view_radius=field_of_view_radius, pixel_radius=pixel_radius
     )
 
-    A_fov = np.pi * field_of_view_radius ** 2
-    A_pix = np.pi * pixel_radius ** 2
+    A_fov = np.pi * field_of_view_radius**2
+    A_pix = np.pi * pixel_radius**2
 
     num = int(np.round(A_fov / A_pix))
 
@@ -203,7 +208,9 @@ def test_get_cherenkov_bunches_which_cause_response_in_dummy_instrument():
 
         cherenkov_bunches_Tpap = np.array(
             # x/cm, y/cm, cx/1, cy/1, time/ns, zem/cm, bsize/1, wvl/nm
-            [[0.0, 0.0, 0.0, 0.0, 0.0, 1e5, scn["atmo"], 433],],
+            [
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1e5, scn["atmo"], 433],
+            ],
             dtype=np.float32,
         )
 
@@ -212,10 +219,12 @@ def test_get_cherenkov_bunches_which_cause_response_in_dummy_instrument():
         NN = 1000
         nn = 0
         for i in range(NN):
-            cer = acr.instrument.toy.get_cherenkov_bunches_which_cause_response(
-                cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
-                instrument=toy,
-                prng=prng,
+            cer = (
+                acr.instrument.toy.get_cherenkov_bunches_which_cause_response(
+                    cherenkov_bunches_Tpap=cherenkov_bunches_Tpap,
+                    instrument=toy,
+                    prng=prng,
+                )
             )
             nn += len(cer)
 

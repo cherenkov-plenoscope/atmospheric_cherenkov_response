@@ -39,8 +39,6 @@ def estimate_cherenkov_bunch_statistics(cherenkov_bunches):
     return ase
 
 
-
-
 def init_grid_geometry_from_job(job):
     assert job["plenoscope_pointing"]["zenith_deg"] == 0.0
     assert job["plenoscope_pointing"]["azimuth_deg"] == 0.0
@@ -72,8 +70,6 @@ def init_grid_geometry_from_job(job):
         num_bins_radius=job["grid"]["num_bins_radius"],
     )
     return grid_geometry
-
-
 
 
 job = acr.production.map_and_reduce.make_example_job()
@@ -204,7 +200,6 @@ with cpw.cherenkov.CherenkovEventTapeWriter(
 ) as evttar, tarfile.open(grid_histogram_path, "w") as imgtar, tarfile.open(
     grid_roi_histogram_path, "w"
 ) as imgroitar:
-
     with cpw.CorsikaPrimary(
         corsika_path=config["executables"]["corsika_primary"]["path"],
         steering_dict=corsika_primary_steering,
@@ -241,7 +236,8 @@ with cpw.cherenkov.CherenkovEventTapeWriter(
                 tabrec=tabrec,
                 key="cherenkovsize",
                 record=make_cherenkovsize_record(
-                    uid=uid, cherenkov_bunches=cherenkov_bunches,
+                    uid=uid,
+                    cherenkov_bunches=cherenkov_bunches,
                 ),
             )
 

@@ -42,7 +42,8 @@ def make_direction_on_edge_of_viewcone_when_viewcone_pointing(
     )
 
     rot_civil = pointing.make_civil_rotation_for_altitude_azimuth_mount(
-        azimuth_deg=pointing_azimuth_deg, zenith_deg=pointing_zenith_deg,
+        azimuth_deg=pointing_azimuth_deg,
+        zenith_deg=pointing_zenith_deg,
     )
     t_civil = {
         "pos": [0, 0, 0],

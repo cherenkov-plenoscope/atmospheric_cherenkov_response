@@ -39,7 +39,7 @@ def where_grid_idxs_within_radius(grid_geometry, radius, center_x, center_y):
                 continue
             delta_x = pgg["xy_bin_centers"][x_bin] - center_x
             delta_y = pgg["xy_bin_centers"][y_bin] - center_y
-            if delta_x ** 2 + delta_y ** 2 > radius ** 2:
+            if delta_x**2 + delta_y**2 > radius**2:
                 continue
             grid_idxs_x.append(x_bin)
             grid_idxs_y.append(y_bin)

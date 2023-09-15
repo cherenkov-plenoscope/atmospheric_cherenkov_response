@@ -65,7 +65,8 @@ def estimate_projection_on_ground(instrument, num_rays=1000):
                 incoming_direction = -1.0 * viewing_direction
 
                 isec = intersection_of_ray_on_ground(
-                    support=corner, direction=incoming_direction,
+                    support=corner,
+                    direction=incoming_direction,
                 )
                 px = isec[0]
                 py = isec[1]
