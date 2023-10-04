@@ -219,7 +219,7 @@ def draw_night_sky_background(
     std = np.sqrt(mean)
     size = num_time_slices * num_pixel
     nnn = np.round(prng.normal(loc=mean, scale=std, size=size))
-    nnn = nnn.astype(np.int)
+    nnn = nnn.astype(np.int64)
     nnn[nnn < 0] = 0
     nsb = nnn.reshape((num_time_slices, num_pixel))
     return nsb
