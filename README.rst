@@ -14,24 +14,24 @@ Algorithm
 *********
 
 
-0.  Pick a threshold photon number ``T1`` where trigger curve starts rising
+1.  Pick a threshold photon number ``T1`` where trigger curve starts rising
     (for a given type of primary)
 
-1.  Generate shower such that particle direction hits ground at 0,0;
+2.  Generate shower such that particle direction hits ground at 0,0;
     shower direction spread over large solid angle Omega (energy-dep.)
     (for charged particles)
     {could also pick (0,0) at some height, but I believe for ``z`` =0 the photon
     scatter is smallest}
 
-2.  Divide ground in grid of spacing = mirror diameter; could e.g. without
+3.  Divide ground in grid of spacing = mirror diameter; could e.g. without
     too much trouble use up to ``M`` x ``M`` = 1000 x 1000 grid cells = 70 x 70 km^2;
     grid area is ``A``, grid centered on (0,0)
 
-3.  Reset photon counter for each cell
+4.  Reset photon counter for each cell
 
-3.  For each shower, shift grid randomly in ``x``, ``y`` by 1/2 mirror diameter
+5.  For each shower, shift grid randomly in ``x``, ``y`` by 1/2 mirror diameter
 
-4.  Loop over shower photons
+6.  Loop over shower photons
 
     a.  reject photon if angle outside FOV
     b.  for each photon, calculate grid cell index ``ix``, ``iy``
@@ -41,7 +41,7 @@ Algorithm
     d.  increment photon counter for cell
     e.  optionally save photon in a buffer
 
-5.  Loop over grid cells
+7.  Loop over grid cells
 
     a.  count cells with photons > ``T1`` : ``N_1``
     b.  using trigger curve for given particle type;
@@ -51,12 +51,12 @@ Algorithm
     c.  Increment event counters by ``N_1`` , ``N_2``
         Increment error counters by ``N_1`` ^2, ``N_2`` ^2
 
-6.  For detailed simulation, optionally output photons for
+8.  For detailed simulation, optionally output photons for
     few randomly selected ``T1`` -triggered cells
     (up to 10 should be fine, given that
     probably only one of 10 triggers the detailed simulation)
 
-7.  Toy effective area (x solid angle): (``N_1`` event counter/``M`` ^2 / Nevent)* ``A`` * ``Omega``
+9.  Toy effective area (x solid angle): (``N_1`` event counter/``M`` ^2 / Nevent)* ``A`` * ``Omega``
     error = ``sqrt(error counter)`` ...
     Somewhat better effective area: ``N_2`` event counter ...
     Final eff. area: ``N1_eff`` area x fraction of events kept in detailed sim.
