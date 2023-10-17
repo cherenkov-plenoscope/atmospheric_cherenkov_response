@@ -34,6 +34,7 @@ setuptools.setup(
         "homogeneous_transformation",
         "json_utils_sebastian-achim-mueller",
         "rename_after_writing",
+        "photon_spectra_cherenkov-plenoscope-project",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
