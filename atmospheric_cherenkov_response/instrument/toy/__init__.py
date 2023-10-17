@@ -2,7 +2,7 @@ import numpy as np
 import photon_spectra
 import binning_utils
 import solid_angle_utils
-import plenopy
+import thin_lens
 from optic_object_wavefronts.geometry.grid import hexagonal as hexgrid
 from corsika_primary.I import BUNCH
 from ... import night_sky_background
@@ -505,7 +505,7 @@ def calculate_photon_x_y_t_on_screen(
     t_Tpap,
     speed_of_light=299792458,
 ):
-    screen_distance = plenopy.thin_lens.object_distance_2_image_distance(
+    screen_distance = thin_lens.compute_image_distance_for_object_distance(
         object_distance=focus_depth,
         focal_length=focal_length,
     )

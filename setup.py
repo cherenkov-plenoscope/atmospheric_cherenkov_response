@@ -35,6 +35,8 @@ setuptools.setup(
         "json_utils_sebastian-achim-mueller",
         "rename_after_writing",
         "photon_spectra_cherenkov-plenoscope-project",
+        "thin_lens",
+        "optic_object_wavefronts",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
