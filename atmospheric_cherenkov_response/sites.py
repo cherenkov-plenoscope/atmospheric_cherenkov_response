@@ -40,12 +40,16 @@ def _all():
         },
     }
 
+    PRACTICALLY_ZERO = (
+        1e-9  # Corsika's magnetic field must not be exactly zero.
+    )
+
     sites["namibiaOff"] = copy.deepcopy(sites["namibia"])
     sites["namibiaOff"][
         "comment"
     ] += " Here earth's magnetic field is zero. Only for demonstration!"
-    sites["namibiaOff"]["earth_magnetic_field_x_muT"] = 0.0
-    sites["namibiaOff"]["earth_magnetic_field_z_muT"] = 0.0
+    sites["namibiaOff"]["earth_magnetic_field_x_muT"] = PRACTICALLY_ZERO
+    sites["namibiaOff"]["earth_magnetic_field_z_muT"] = PRACTICALLY_ZERO
     sites["namibiaOff"]["geomagnetic_cutoff_rigidity_GV"] = 0.0
     sites["namibiaOff"]["plotting"] = {
         "label": "Gamsberg-Off",
