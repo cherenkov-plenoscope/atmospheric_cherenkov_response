@@ -385,18 +385,18 @@ def get_cherenkov_bunches_which_cause_response(
     assert np.all(p_reflected_by_mirror <= 1.0)
     assert np.all(p_reflected_by_mirror >= 0.0)
 
-    p_detected_by_photo_sensor = evaluate_by_wavelength(
+    p_detected_by_photosensor = evaluate_by_wavelength(
         photon_wavelength_m=m_over_nm * cer[:, BUNCH.WAVELENGTH_NM],
         function_wavelength_m=dum["camera"]["efficiency"]["wavelength_m"],
         function_value=dum["camera"]["efficiency"]["value"],
     )
-    assert np.all(p_detected_by_photo_sensor <= 1.0)
-    assert np.all(p_detected_by_photo_sensor >= 0.0)
+    assert np.all(p_detected_by_photosensor <= 1.0)
+    assert np.all(p_detected_by_photosensor >= 0.0)
 
     p_total = (
         p_passing_atmosphere
         * p_reflected_by_mirror
-        * p_detected_by_photo_sensor
+        * p_detected_by_photosensor
     )
 
     prob = prng.uniform(low=0, high=1, size=len(cer))
