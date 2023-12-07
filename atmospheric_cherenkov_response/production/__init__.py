@@ -26,7 +26,7 @@ def init(work_dir, config=None):
             f.write(
                 json_utils.dumps(
                     {
-                        "path": magnetic_deflection.examples.CORSIKA_PRIMARY_MOD_PATH
+                        "path": corsika_primary.install.typical_corsika_primary_mod_path()
                     },
                     indent=4,
                 )
