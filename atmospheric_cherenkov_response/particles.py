@@ -183,15 +183,6 @@ def _assert_particle(particle):
     assert compile_energy(particle["population"]["energy"]["stop_GeV"]) > 0.0
 
 
-EXAMPLE_SITE_PARTICLE_DEFLECTION = {
-    "particle_energy_GeV": [5, 1000],
-    "particle_azimuth_deg": [0.0, 0.0],
-    "particle_zenith_deg": [0.0, 0.0],
-    "cherenkov_x_m": [0.0, 0.0],
-    "cherenkov_y_m": [0.0, 0.0],
-}
-
-
 def draw_corsika_primary_steering(
     run_id,
     site,
