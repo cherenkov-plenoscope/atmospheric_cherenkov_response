@@ -16,12 +16,12 @@ def particles():
     c = {}
     c["gamma"] = {}
     c["gamma"]["color"] = "black"
-    c["gamma"]["rgb"] = (0, 0 ,0)
+    c["gamma"]["rgb"] = (0, 0, 0)
     c["gamma"]["cmap"] = make_linear_cmap(c["gamma"]["rgb"])
 
     c["electron"] = {}
     c["electron"]["color"] = "blue"
-    c["electron"]["rgb"] = (0, 0 ,1)
+    c["electron"]["rgb"] = (0, 0, 1)
     c["electron"]["cmap"] = make_linear_cmap(c["electron"]["rgb"])
 
     c["proton"] = {}
@@ -37,7 +37,9 @@ def particles():
 
 
 def energy_cmap(energy_start_GeV, energy_stop_GeV, cmap="nipy_spectral"):
-    norm = matplotlib.colors.LogNorm(vmin=energy_start_GeV, vmax=energy_stop_GeV)
+    norm = matplotlib.colors.LogNorm(
+        vmin=energy_start_GeV, vmax=energy_stop_GeV
+    )
     return matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
 
 
@@ -47,6 +49,3 @@ def config():
     c["label_unit_seperator"] = "$\\,/\\,$"
     c["rcParams"] = {"mathtext.fontset": "cm", "font.family": "STIXGeneral"}
     return c
-
-
-

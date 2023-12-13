@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 
 def _all():
@@ -81,3 +82,12 @@ def keys():
 
 def init(key):
     return _all()[key]
+
+
+def assert_valid(site):
+    assert (
+        site["observation_level_asl_m"] >= -500
+    )  # already unreasonable, but hey!
+    assert site["corsika_atmosphere_id"] >= 0
+    assert not np.isnan(float(site["earth_magnetic_field_x_muT"]))
+    assert not np.isnan(float(site["earth_magnetic_field_z_muT"]))
