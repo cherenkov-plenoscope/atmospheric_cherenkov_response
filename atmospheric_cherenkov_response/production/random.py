@@ -50,7 +50,6 @@ def draw_event(
 
     # energies
     # --------
-    print("energies")
     start_energy_GeV = particles.compile_energy(
         particle["population"]["energy"]["start_GeV"]
     )
@@ -67,7 +66,6 @@ def draw_event(
 
     # instrument pointings
     # --------------------
-    print("instrument pointings")
     instrument_pointings = []
     for i in range(num_events):
         instrument_pointing = pointing_range.draw_pointing(
@@ -86,7 +84,6 @@ def draw_event(
     )
     primary_directions = []
     for i in range(num_events):
-        print("primary directions", i)
         res, dbg = rnd.draw_particle_direction(
             prng=prng,
             method="grid",

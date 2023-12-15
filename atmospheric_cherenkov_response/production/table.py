@@ -1,55 +1,68 @@
 import numpy as np
 
-STRUCTURE = {}
 
-STRUCTURE["primary"] = {
-    "particle_id": {"dtype": "<i8", "comment": "CORSIKA particle-id"},
-    "energy_GeV": {"dtype": "<f8", "comment": ""},
-    "azimuth_rad": {
+def init():
+    t = {}
+    t["primary"] = init_primary()
+    t["cherenkovsize"] = init_cherenkovsize()
+    return t
+
+
+def init_primary():
+    t = {}
+    t["particle_id"] = {"dtype": "<i8", "comment": "CORSIKA particle-id"}
+    t["energy_GeV"] = {"dtype": "<f8", "comment": ""}
+    t["azimuth_rad"] = {
         "dtype": "<f8",
         "comment": "Direction of the primary particle w.r.t. magnetic north.",
-    },
-    "zenith_rad": {
+    }
+    t["zenith_rad"] = {
         "dtype": "<f8",
         "comment": "Direction of the primary particle.",
-    },
-    "max_scatter_rad": {"dtype": "<f8", "comment": ""},
-    "magnet_azimuth_rad": {
-        "dtype": "<f8",
-        "comment": "The azimuth direction that the primary particle needs "
-        "to have in order to induce an air-shower that emits its "
-        "Cherenkov-light head on the pointing of the instrument.",
-    },
-    "magnet_zenith_rad": {
-        "dtype": "<f8",
-        "comment": "The zenith direction that the primary particle needs "
-        "to have in order to induce an air-shower that emits its "
-        "Cherenkov-light head on the pointing of the instrument.",
-    },
-    "magnet_cherenkov_pool_x_m": {
-        "dtype": "<f8",
-        "comment": "This offset must be added to the core-position, where "
-        "the trajectory of the primary particle intersects the "
-        "observation-level, in order for the instrument to stand in "
-        "the typical center of the Cherenkov-pool.",
-    },
-    "magnet_cherenkov_pool_y_m": {"dtype": "<f8", "comment": ""},
-    "solid_angle_thrown_sr": {"dtype": "<f8", "comment": ""},
-    "depth_g_per_cm2": {"dtype": "<f8", "comment": ""},
-    "momentum_x_GeV_per_c": {"dtype": "<f8", "comment": ""},
-    "momentum_y_GeV_per_c": {"dtype": "<f8", "comment": ""},
-    "momentum_z_GeV_per_c": {"dtype": "<f8", "comment": ""},
-    "first_interaction_height_asl_m": {"dtype": "<f8", "comment": ""},
-    "starting_height_asl_m": {"dtype": "<f8", "comment": ""},
-    "starting_x_m": {"dtype": "<f8", "comment": ""},
-    "starting_y_m": {"dtype": "<f8", "comment": ""},
-}
+    }
+    t["depth_g_per_cm2"] = {"dtype": "<f8", "comment": ""}
 
-STRUCTURE["cherenkovsize"] = {
-    "num_bunches": {"dtype": "<i8", "comment": ""},
-    "num_photons": {"dtype": "<f8", "comment": ""},
-}
+    t["momentum_x_GeV_per_c"] = {"dtype": "<f8", "comment": ""}
+    t["momentum_y_GeV_per_c"] = {"dtype": "<f8", "comment": ""}
+    t["momentum_z_GeV_per_c"] = {"dtype": "<f8", "comment": ""}
 
+    t["starting_height_asl_m"] = {
+        "dtype": "<f8", "comment": "The simulation of the primary particle "
+            "starts here."
+    }
+    t["starting_x_m"] = {"dtype": "<f8", "comment": "See starting_height_asl_m."}
+    t["starting_y_m"] = {"dtype": "<f8", "comment": "See starting_height_asl_m."}
+
+    t["solid_angle_thrown_sr"] = {
+        "dtype": "<f8",
+        "comment": "The size of the solid angle from which the direction "
+        "of the primary particle is drawn from."
+    }
+
+    t["first_interaction_height_asl_m"] = {
+        "dtype": "<f8", "comment": "See CORSIKA, this is not very "
+            "meaningfull for e.g. electrons."
+    }
+
+    t["inner_atmopsheric_magnetic_cutoff"] = {
+        "dtype": "<i8",
+        "comment": "A boolean flag (0, 1). If 1, the tables for magnetic "
+            "deflection were not able to predict the direction of the "
+            "primary particle. This is a strong indicator for there is "
+            "no primary direction which can produce Cherenkov light at a "
+            "given direction."
+    }
+    return t
+
+
+def init_cherenkovsize():
+    t = {}
+    t["num_bunches"] = {"dtype": "<i8", "comment": ""}
+    t["num_photons"] = {"dtype": "<f8", "comment": ""}
+    return t
+
+
+STRUCTURE = {}
 STRUCTURE["particlepool"] = {
     "num_water_cherenkov": {
         "dtype": "<i8",
