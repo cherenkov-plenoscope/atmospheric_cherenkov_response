@@ -52,13 +52,13 @@ def estimate_projection_on_ground(instrument, num_rays=1000):
                 bounding_box=instrument["bounding_box"], ix=ix, iy=iy, iz=1
             )
 
-            for viewcone_azimuth_deg in np.linspace(0, 360, num_rays):
+            for viewcone_azimuth_rad in np.linspace(0, 360, num_rays):
                 viewing_direction = viewcone.make_direction_on_edge_of_viewcone_when_viewcone_pointing(
-                    pointing_azimuth_deg=instrument["viewcone"]["azimuth_deg"],
-                    pointing_zenith_deg=instrument["viewcone"]["zenith_deg"],
-                    viewcone_azimuth_deg=viewcone_azimuth_deg,
-                    viewcone_half_angle_deg=instrument["viewcone"][
-                        "half_angle_deg"
+                    pointing_azimuth_rad=instrument["viewcone"]["azimuth_rad"],
+                    pointing_zenith_rad=instrument["viewcone"]["zenith_rad"],
+                    viewcone_azimuth_rad=viewcone_azimuth_rad,
+                    viewcone_half_angle_rad=instrument["viewcone"][
+                        "half_angle_rad"
                     ],
                 )
 

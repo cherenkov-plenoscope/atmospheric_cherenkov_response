@@ -7,4 +7,5 @@ from . import night_sky_background
 from . import particles
 from . import sites
 from . import pointing
+from . import pointing_range
 from . import utils

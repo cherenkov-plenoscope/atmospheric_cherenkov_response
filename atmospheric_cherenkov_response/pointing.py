@@ -1,74 +1,103 @@
+"""
+Defines how the pointing of a telescope's mount effects the
+rotation of its principal aperture plane.
+"""
 import numpy as np
-import homogeneous_transformation
+import spherical_coordinates
 
 
-def init(azimuth_deg, zenith_deg):
-    assert not np.isnan(azimuth_deg)
-    assert not np.isnan(zenith_deg)
-    return {"azimuth_deg": azimuth_deg, "zenith_deg": zenith_deg}
+def Pointing(azimuth_rad, zenith_rad):
+    """
+    Defines a dict for  the pointing of an instrument.
+    Ensures: -PI <= azimuth_rad < +PI
+
+    Parameters
+    ----------
+    azimuth_rad : float
+        Direction of optical axis.
+    zenith_rad : float
+        Direction of optical axis.
+
+    Returns
+    -------
+    pointing : dict
+    """
+    return {
+        "azimuth_rad": spherical_coordinates.azimuth_range(azimuth_rad),
+        "zenith_rad": zenith_rad,
+    }
 
 
-def make_pointing_key(pointing):
-    return "az{:06d}mdeg_zd{:06d}mdeg".format(
-        int(pointing["azimuth_deg"] * 1e3),
-        int(pointing["zenith_deg"] * 1e3),
-    )
+def pointing_to_civil_rotation(pointing, mount):
+    """
+    Defines the goemetry of a telescope mount.
 
+    Parameters
+    ----------
+    poining : dict {azimuth_rad, zenith_rad}
+        Direction of the instrument's optical axis.
+    mount : str
+        Defines the geometry of the mount.
+            - ["cable_robot", "hexapod", "steward"]
+            - "altitude_azimuth"
 
-def make_civil_rotation_of_principal_aperture_plane(pointing, mount):
-    """ """
-    if mount == "cable_robot_mount":
-        return make_civil_rotation_for_cable_robot_mount(**pointing)
-    elif mount == "altitude_azimuth_mount":
+    Returns
+    -------
+    civil rotation : dict
+        Can be compiled with homogeneous_transformation.compile to obtain
+        rotation matrices.
+    """
+    if mount in ["cable_robot", "hexapod", "steward"]:
+        return make_civil_rotation_for_mounts_without_z_rotation(**pointing)
+    elif mount == "altitude_azimuth":
         return make_civil_rotation_for_altitude_azimuth_mount(**pointing)
     else:
         raise KeyError("No such mount: '{:s}'".format(mount))
 
 
-def make_civil_rotation_for_altitude_azimuth_mount(azimuth_deg, zenith_deg):
+def make_civil_rotation_for_altitude_azimuth_mount(azimuth_rad, zenith_rad):
     """
-    x-axis is magnetic north where azimuth is 0deg.
+    x-axis is magnetic north where azimuth is 0.
     z-axis goes up.
-
     """
     return {
         "repr": "tait_bryan",
-        "xyz_deg": np.array([0.0, -zenith_deg, -azimuth_deg]),
+        "xyz_deg": np.array(
+            [0.0, np.rad2deg(-zenith_rad), np.rad2deg(-azimuth_rad)]
+        ),
     }
 
 
-def make_civil_rotation_for_cable_robot_mount(
-    azimuth_deg, zenith_deg, eps_deg=1e-5, eps_1=1e-5
+def make_civil_rotation_for_mounts_without_z_rotation(
+    azimuth_rad,
+    zenith_rad,
+    eps_rad=1e-7,
 ):
     """
-    does not rotate in z-axis
+    Does not rotate in z-axis
     """
-    if np.abs(zenith_deg) > eps_deg:
-        rot_civil_altaz = make_civil_rotation_for_altitude_azimuth_mount(
-            azimuth_deg=azimuth_deg,
-            zenith_deg=zenith_deg,
+    if np.abs(zenith_rad) > eps_rad:
+        zenith_direction = np.array([0, 0, 1])
+        pointing_direction = np.array(
+            spherical_coordinates.az_zd_to_cx_cy_cz(
+                azimuth_rad=azimuth_rad,
+                zenith_rad=zenith_rad,
+            )
         )
-        t_civil_altaz = {"rot": rot_civil_altaz, "pos": [0, 0, 0]}
-        t_altaz = homogeneous_transformation.compile(t_civil_altaz)
-        z = np.array([0, 0, 1])
-        z_t = homogeneous_transformation.transform_orientation(t_altaz, z)
-        assert np.abs(np.linalg.norm(z_t) - 1) < eps_1
-        pointing_direction = z_t
-        rot_axis = np.cross(z.T, pointing_direction)
+        rot_axis = np.cross(zenith_direction.T, pointing_direction)
         rot_axis /= np.linalg.norm(rot_axis)
-        assert np.abs(np.linalg.norm(rot_axis) - 1) < eps_1
-        angle_z_and_pointing_rad = np.arccos(np.dot(pointing_direction, z))
-        angle_z_and_pointing_deg = np.rad2deg(angle_z_and_pointing_rad)
-        assert np.abs(zenith_deg) - angle_z_and_pointing_deg < eps_1
+        rot_angle = spherical_coordinates.angle_between_xyz(
+            zenith_direction,
+            pointing_direction,
+        )
         rot = {
             "repr": "axis_angle",
             "axis": rot_axis,
-            "angle_deg": angle_z_and_pointing_deg,
+            "angle_deg": np.rad2deg(rot_angle),
         }
     else:
         rot = {
             "repr": "tait_bryan",
             "xyz_deg": [0, 0, 0],
         }
-
     return rot

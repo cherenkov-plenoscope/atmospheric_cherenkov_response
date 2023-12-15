@@ -6,6 +6,7 @@ import magnetic_deflection
 import json_line_logger
 import rename_after_writing as rnw
 from . import map_and_reduce
+from . import random
 from .. import pointing
 from .. import sites
 from .. import particles

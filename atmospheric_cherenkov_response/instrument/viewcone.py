@@ -3,47 +3,40 @@ import homogeneous_transformation
 from .. import pointing
 
 EXAMPLE = {
-    "half_angle_deg": 3.25,
-    "azimuth_deg": 0.0,
-    "zenith_deg": 45.0,
+    "half_angle_rad": 3.25,
+    "azimuth_rad": 0.0,
+    "zenith_rad": 45.0,
 }
 
 
-def pointing_to_civil_rotation(azimuth_deg, zenith_deg):
-    """
-    X-axis is north where azimuth is 0deg.
-    """
-    return {
-        "repr": "tait_bryan",
-        "xyz_deg": np.array([0.0, -zenith_deg, -azimuth_deg]),
-    }
-
-
 def make_direction_on_edge_of_viewcone_when_viewcone_pointing_to_z(
-    viewcone_azimuth_deg, viewcone_half_angle_deg
+    viewcone_azimuth_rad, viewcone_half_angle_rad
 ):
     sin = np.sin
     cos = np.cos
-    theta = np.deg2rad(viewcone_half_angle_deg)
-    phi = np.deg2rad(viewcone_azimuth_deg)
+    theta = viewcone_half_angle_rad
+    phi = viewcone_azimuth_rad
 
     return np.array([sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)])
 
 
 def make_direction_on_edge_of_viewcone_when_viewcone_pointing(
-    pointing_azimuth_deg,
-    pointing_zenith_deg,
-    viewcone_azimuth_deg,
-    viewcone_half_angle_deg,
+    pointing_azimuth_rad,
+    pointing_zenith_rad,
+    viewcone_azimuth_rad,
+    viewcone_half_angle_rad,
 ):
     dir_z = make_direction_on_edge_of_viewcone_when_viewcone_pointing_to_z(
-        viewcone_azimuth_deg=viewcone_azimuth_deg,
-        viewcone_half_angle_deg=viewcone_half_angle_deg,
+        viewcone_azimuth_rad=viewcone_azimuth_rad,
+        viewcone_half_angle_rad=viewcone_half_angle_rad,
     )
 
-    rot_civil = pointing.make_civil_rotation_for_altitude_azimuth_mount(
-        azimuth_deg=pointing_azimuth_deg,
-        zenith_deg=pointing_zenith_deg,
+    rot_civil = pointing.pointing_to_civil_rotation(
+        {
+            "azimuth_rad": pointing_azimuth_rad,
+            "zenith_rad": pointing_zenith_rad,
+        },
+        mount="cable_robot",
     )
     t_civil = {
         "pos": [0, 0, 0],
