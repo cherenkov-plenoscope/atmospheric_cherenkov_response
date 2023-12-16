@@ -9,6 +9,7 @@ import json_utils
 import magnetic_deflection as mdfl
 import sparse_numeric_table as spt
 import solid_angle_utils
+import merlict_development_kit_python
 
 op = os.path
 
@@ -46,7 +47,7 @@ def init_grid_geometry_from_job(job):
 
     _scenery_path = op.join(job["plenoscope_scenery_path"], "scenery.json")
     _light_field_sensor_geometry = (
-        plenoptics.production.merlict_cpp.read_plenoscope_geometry(
+        merlict_development_kit_python.plenoscope_propagator.read_plenoscope_geometry(
             merlict_scenery_path=_scenery_path
         )
     )
