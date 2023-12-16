@@ -45,8 +45,10 @@ def init_grid_geometry_from_job(job):
     plenoscope_pointing_direction = np.array([0, 0, 1])  # For now this is fix.
 
     _scenery_path = op.join(job["plenoscope_scenery_path"], "scenery.json")
-    _light_field_sensor_geometry = production.merlict.read_plenoscope_geometry(
-        merlict_scenery_path=_scenery_path
+    _light_field_sensor_geometry = (
+        plenoptics.production.merlict_cpp.read_plenoscope_geometry(
+            merlict_scenery_path=_scenery_path
+        )
     )
     plenoscope_diameter = (
         2.0

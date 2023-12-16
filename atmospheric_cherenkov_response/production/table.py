@@ -27,30 +27,37 @@ def init_primary():
     t["momentum_z_GeV_per_c"] = {"dtype": "<f8", "comment": ""}
 
     t["starting_height_asl_m"] = {
-        "dtype": "<f8", "comment": "The simulation of the primary particle "
-            "starts here."
+        "dtype": "<f8",
+        "comment": "The simulation of the primary particle " "starts here.",
     }
-    t["starting_x_m"] = {"dtype": "<f8", "comment": "See starting_height_asl_m."}
-    t["starting_y_m"] = {"dtype": "<f8", "comment": "See starting_height_asl_m."}
+    t["starting_x_m"] = {
+        "dtype": "<f8",
+        "comment": "See starting_height_asl_m.",
+    }
+    t["starting_y_m"] = {
+        "dtype": "<f8",
+        "comment": "See starting_height_asl_m.",
+    }
 
     t["solid_angle_thrown_sr"] = {
         "dtype": "<f8",
         "comment": "The size of the solid angle from which the direction "
-        "of the primary particle is drawn from."
+        "of the primary particle is drawn from.",
     }
 
     t["first_interaction_height_asl_m"] = {
-        "dtype": "<f8", "comment": "See CORSIKA, this is not very "
-            "meaningfull for e.g. electrons."
+        "dtype": "<f8",
+        "comment": "See CORSIKA, this is not very "
+        "meaningfull for e.g. electrons.",
     }
 
     t["inner_atmopsheric_magnetic_cutoff"] = {
         "dtype": "<i8",
         "comment": "A boolean flag (0, 1). If 1, the tables for magnetic "
-            "deflection were not able to predict the direction of the "
-            "primary particle. This is a strong indicator for there is "
-            "no primary direction which can produce Cherenkov light at a "
-            "given direction."
+        "deflection were not able to predict the direction of the "
+        "primary particle. This is a strong indicator for there is "
+        "no primary direction which can produce Cherenkov light at a "
+        "given direction.",
     }
     return t
 
@@ -62,6 +69,7 @@ def init_cherenkovsize():
     return t
 
 
+"""
 STRUCTURE = {}
 STRUCTURE["particlepool"] = {
     "num_water_cherenkov": {
@@ -157,3 +165,4 @@ STRUCTURE["instrument"] = {
         "relative to the clock in CORSIKA.",
     },
 }
+"""
