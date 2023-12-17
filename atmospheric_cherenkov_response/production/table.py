@@ -8,6 +8,29 @@ def init():
     return t
 
 
+def to_dtype(level, include_index=True):
+    """
+    Returns a list of [(str, str), (str, str), ... ] to
+    initialize a numpy recarray.
+
+    Parameters
+    ----------
+    level : {key1: {"dtype": dtype_str1, "comment": "Foo bar..."}, key2: ...}
+        A level of the table. E.g. 'primary'.
+
+    Returns
+    -------
+    dtype : [(key1, dtype_str1), (key2, dtype_str2), ... ]
+        The dtype.
+    """
+    out = []
+    if include_index:
+        out.append(("idx", "<u8"))
+    for key in level:
+        out.append((key, level[key]["dtype"]))
+    return out
+
+
 def init_primary():
     t = {}
     t["particle_id"] = {"dtype": "<i8", "comment": "CORSIKA particle-id"}
@@ -58,6 +81,16 @@ def init_primary():
         "primary particle. This is a strong indicator for there is "
         "no primary direction which can produce Cherenkov light at a "
         "given direction.",
+    }
+    t["pointing_azimuth_rad"] = {
+        "dtype": "<f8",
+        "comment": "Azimuth direction of the instrument's optical axis "
+        "w.r.t. magnetic north.",
+    }
+    t["pointing_zenith_rad"] = {
+        "dtype": "<f8",
+        "comment": "Zenith direction of the instrument's optical axis "
+        "w.r.t. magnetic north.",
     }
     return t
 
