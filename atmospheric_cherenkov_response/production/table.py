@@ -1,37 +1,49 @@
 import numpy as np
+import dynamicsizerecarray
 
 
-def init():
+def init_table_structure():
     t = {}
-    t["primary"] = init_primary()
-    t["cherenkovsize"] = init_cherenkovsize()
+    t["primary"] = init_primary_level_structure()
+    t["cherenkovsize"] = init_cherenkovsize_level_structure()
     return t
 
 
-def to_dtype(level, include_index=True):
+def to_dtype(level_structure, include_index=True):
     """
     Returns a list of [(str, str), (str, str), ... ] to
     initialize a numpy recarray.
 
     Parameters
     ----------
-    level : {key1: {"dtype": dtype_str1, "comment": "Foo bar..."}, key2: ...}
-        A level of the table. E.g. 'primary'.
+    level_structure : {key1: {"dtype": dtype1}, key2: { ... }}
+        A level_structure of the table. E.g. 'primary'.
 
     Returns
     -------
-    dtype : [(key1, dtype_str1), (key2, dtype_str2), ... ]
+    dtype : [(key1, dtype1), (key2, dtype2), ... ]
         The dtype.
     """
     out = []
     if include_index:
         out.append(("idx", "<u8"))
-    for key in level:
-        out.append((key, level[key]["dtype"]))
+    for key in level_structure:
+        out.append((key, level_structure[key]["dtype"]))
     return out
 
 
-def init_primary():
+def init_table_dynamicsizerecarray(table_structure=None):
+    if table_structure is None:
+        table_structure = init_table_structure()
+    out = {}
+    for level in table_structure:
+        out[level] = dynamicsizerecarray.DynamicSizeRecarray(
+            dtype=to_dtype(level_structure=table_structure[level]),
+        )
+    return out
+
+
+def init_primary_level_structure():
     t = {}
     t["particle_id"] = {"dtype": "<i8", "comment": "CORSIKA particle-id"}
     t["energy_GeV"] = {"dtype": "<f8", "comment": ""}
@@ -95,7 +107,7 @@ def init_primary():
     return t
 
 
-def init_cherenkovsize():
+def init_cherenkovsize_level_structure():
     t = {}
     t["num_bunches"] = {"dtype": "<i8", "comment": ""}
     t["num_photons"] = {"dtype": "<f8", "comment": ""}
