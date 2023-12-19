@@ -26,7 +26,6 @@ setuptools.setup(
         "atmospheric_cherenkov_response.instrument",
         "atmospheric_cherenkov_response.instrument.toy",
         "atmospheric_cherenkov_response.grid",
-        "atmospheric_cherenkov_response.production",
         "atmospheric_cherenkov_response.analysis",
     ],
     package_data={"atmospheric_cherenkov_response": []},
