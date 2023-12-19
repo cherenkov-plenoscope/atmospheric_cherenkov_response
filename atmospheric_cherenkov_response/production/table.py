@@ -1,10 +1,12 @@
+import collections
 import numpy as np
 import dynamicsizerecarray
 
 
 def init_table_structure():
-    t = {}
+    t = collections.OrderedDict()
     t["primary"] = init_primary_level_structure()
+    t["pointing"] = init_pointing_level_structure()
     t["cherenkovsize"] = init_cherenkovsize_level_structure()
     return t
 
@@ -44,7 +46,7 @@ def init_table_dynamicsizerecarray(table_structure=None):
 
 
 def init_primary_level_structure():
-    t = {}
+    t = collections.OrderedDict()
     t["particle_id"] = {"dtype": "<i8", "comment": "CORSIKA particle-id"}
     t["energy_GeV"] = {"dtype": "<f8", "comment": ""}
     t["azimuth_rad"] = {
@@ -74,18 +76,17 @@ def init_primary_level_structure():
         "comment": "See starting_height_asl_m.",
     }
 
-    t["solid_angle_thrown_sr"] = {
-        "dtype": "<f8",
-        "comment": "The size of the solid angle from which the direction "
-        "of the primary particle is drawn from.",
-    }
-
     t["first_interaction_height_asl_m"] = {
         "dtype": "<f8",
         "comment": "See CORSIKA, this is not very "
         "meaningfull for e.g. electrons.",
     }
 
+    t["solid_angle_thrown_sr"] = {
+        "dtype": "<f8",
+        "comment": "The size of the solid angle from which the direction "
+        "of the primary particle is drawn from.",
+    }
     t["inner_atmopsheric_magnetic_cutoff"] = {
         "dtype": "<i8",
         "comment": "A boolean flag (0, 1). If 1, the tables for magnetic "
@@ -94,12 +95,17 @@ def init_primary_level_structure():
         "no primary direction which can produce Cherenkov light at a "
         "given direction.",
     }
-    t["pointing_azimuth_rad"] = {
+    return t
+
+
+def init_pointing_level_structure():
+    t = collections.OrderedDict()
+    t["azimuth_rad"] = {
         "dtype": "<f8",
         "comment": "Azimuth direction of the instrument's optical axis "
         "w.r.t. magnetic north.",
     }
-    t["pointing_zenith_rad"] = {
+    t["zenith_rad"] = {
         "dtype": "<f8",
         "comment": "Zenith direction of the instrument's optical axis "
         "w.r.t. magnetic north.",
@@ -108,7 +114,7 @@ def init_primary_level_structure():
 
 
 def init_cherenkovsize_level_structure():
-    t = {}
+    t = collections.OrderedDict()
     t["num_bunches"] = {"dtype": "<i8", "comment": ""}
     t["num_photons"] = {"dtype": "<f8", "comment": ""}
     return t
