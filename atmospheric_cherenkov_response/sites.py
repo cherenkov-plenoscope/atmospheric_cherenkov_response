@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from . import atmosphere
 
 
 def _all():
@@ -67,6 +68,14 @@ def _all():
             ), "The key '{:s}' from '{:s}' not in 'namibia'".format(key, sk)
         for key in sites["namibia"]:
             assert key in sites[sk], "{:s} not in '{:s}'".format(key, sk)
+
+    # add refractive index at observation level
+    for sk in sites:
+        sites[sk][
+            "atmosphere_refractive_index_at_observation_level"
+        ] = atmosphere.refractive_index(
+            altitude_asl_m=sites[sk]["observation_level_asl_m"]
+        )
 
     # put key into dict
     # -----------------

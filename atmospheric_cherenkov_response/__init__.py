@@ -2,10 +2,10 @@ from .version import __version__
 from . import analysis
 from . import grid
 from . import instrument
-from . import production
 from . import night_sky_background
 from . import particles
 from . import sites
 from . import pointing
 from . import pointing_range
 from . import utils
+from . import atmosphere
