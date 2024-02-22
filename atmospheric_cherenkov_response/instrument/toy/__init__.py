@@ -239,13 +239,14 @@ def estimate_camera_response_to_cherenkov(
         prng=prng,
     )
 
+    MOMENTUM_TO_INCIDENT = -1.0
     m_over_cm = 1e-2
     s_over_ns = 1e9
     x_Tscreen, y_Tscreen, t_Tscreen = calculate_photon_x_y_t_on_screen(
         focus_depth=dum["camera"]["focus_depth_m"],
         focal_length=dum["mirror"]["focal_length_m"],
-        cx_Tpap=cer_Tpap[:, BUNCH.CX_RAD],
-        cy_Tpap=cer_Tpap[:, BUNCH.CY_RAD],
+        cx_Tpap=MOMENTUM_TO_INCIDENT * cer_Tpap[:, BUNCH.UX_1],
+        cy_Tpap=MOMENTUM_TO_INCIDENT * cer_Tpap[:, BUNCH.VY_1],
         x_Tpap=cer_Tpap[:, BUNCH.X_CM] * m_over_cm,
         y_Tpap=cer_Tpap[:, BUNCH.Y_CM] * m_over_cm,
         t_Tpap=cer_Tpap[:, BUNCH.TIME_NS] * s_over_ns,
@@ -641,10 +642,11 @@ def make_cherenkov_bunches(
 
     # x/cm, y/cm, cx/1, cy/1, time/ns, zem/cm, bsize/1, wvl/nm
     # --------------------------------------------------------
+    INCIDENTS_TO_MOMENTUM = -1.0
     cer[:, BUNCH.X_CM] = mirror_impacts_x * cm_over_m
     cer[:, BUNCH.Y_CM] = mirror_impacts_y * cm_over_m
-    cer[:, BUNCH.CX_RAD] = cxcycz[:, 0]
-    cer[:, BUNCH.CY_RAD] = cxcycz[:, 1]
+    cer[:, BUNCH.UX_1] = INCIDENTS_TO_MOMENTUM * cxcycz[:, 0]
+    cer[:, BUNCH.VY_1] = INCIDENTS_TO_MOMENTUM * cxcycz[:, 1]
     cer[:, BUNCH.TIME_NS] = times * ns_over_s
     cer[:, BUNCH.EMISSOION_ALTITUDE_ASL_CM] = (
         np.ones(size) * emission_point_m[2] * cm_over_m

@@ -342,8 +342,12 @@ def test_make_cherenkov_bunches():
     assert approx(np.mean(cer[:, BUNCH.X_CM]), 0.0, eps=10)  # cm
     assert approx(np.mean(cer[:, BUNCH.Y_CM]), 0.0, eps=10)  # cm
 
-    assert d2r(0.02) < np.std(cer[:, BUNCH.CX_RAD]) < d2r(0.1)  # rad
-    assert d2r(0.02) < np.std(cer[:, BUNCH.CY_RAD]) < d2r(0.1)  # rad
+    MOMENTUM_TO_INCIDENT = -1.0
+    cer_cx = MOMENTUM_TO_INCIDENT * cer[:, BUNCH.UX_1]
+    cer_cy = MOMENTUM_TO_INCIDENT * cer[:, BUNCH.VY_1]
+
+    assert d2r(0.02) < np.std(cer_cx) < d2r(0.1)  # rad
+    assert d2r(0.02) < np.std(cer_cy) < d2r(0.1)  # rad
 
     assert np.std(cer[:, BUNCH.TIME_NS]) < 1  # ns
 

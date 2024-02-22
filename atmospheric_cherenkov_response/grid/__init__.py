@@ -114,9 +114,10 @@ def cut_cherenkov_bunches_in_field_of_view(
     field_of_view_radius_deg,
     pointing_direction,
 ):
+    MOMENTUM_TO_INCIDENT = -1.0
     bunch_directions = _make_bunch_direction(
-        cx=cherenkov_bunches[:, cpw.I.BUNCH.CX_RAD],
-        cy=cherenkov_bunches[:, cpw.I.BUNCH.CY_RAD],
+        cx=MOMENTUM_TO_INCIDENT * cherenkov_bunches[:, cpw.I.BUNCH.UX_1],
+        cy=MOMENTUM_TO_INCIDENT * cherenkov_bunches[:, cpw.I.BUNCH.VY_1],
     )
     bunch_incidents = -1.0 * bunch_directions
     angle_bunch_pointing = _make_angle_between(
