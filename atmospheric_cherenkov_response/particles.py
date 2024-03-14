@@ -2,108 +2,60 @@ import numpy as np
 import corsika_primary
 import binning_utils
 
+"""
+def scatter_cone(key):
+    out = {}
+    out["gamma"] = {
+        "half_angle_rad": np.deg2rad([3.25, 3.25]),
+        "energy_GeV": [1e-1, 1e4],
+    }
+    out["electron"] = {
+        "half_angle_rad": np.deg2rad([6.5, 6.5]),
+        "energy_GeV": [1e-1, 1e4],
+    }
+    out["proton"] = {
+        "half_angle_rad": np.deg2rad([18.3, 18.3]),
+        "energy_GeV": [1e0, 1e4],
+    }
+    out["helium"] = {
+        "half_angle_rad": np.deg2rad([18.3, 18.3]),
+        "energy_GeV": [1e0, 1e4],
+    }
+    return out[key]
 
-def _all():
-    par = {}
 
-    ebin_GeV = binning_utils.power10.lower_bin_edge
-    stop_GeV = ebin_GeV(decade=3, bin=2, num_bins_per_decade=5)
-
+def energy_stop_GeV():
     stop_GeV = {
         "repr": "binning",
         "decade": 3,
         "bin": 2,
         "num_bins_per_decade": 5,
     }
+    return stop_GeV
+"""
+
+
+def _all():
+    par = {}
 
     par["gamma"] = {
-        "corsika_particle_id": 1,
+        "corsika": {"particle_id": 1, "min_energy_GeV": None},
         "electric_charge_qe": 0.0,
-        "population": {
-            "energy": {
-                "start_GeV": {
-                    "repr": "binning",
-                    "decade": -1,
-                    "bin": 2,
-                    "num_bins_per_decade": 5,
-                },
-                "stop_GeV": stop_GeV,
-                "power_law_slope": -1.5,
-            },
-            "direction": {
-                "scatter_cone": {
-                    "half_angle_rad": np.deg2rad([3.25, 3.25]),
-                    "energy_GeV": [1e-1, 1e4],
-                },
-            },
-        },
     }
 
     par["electron"] = {
-        "corsika_particle_id": 3,
+        "corsika": {"particle_id": 3, "min_energy_GeV": None},
         "electric_charge_qe": -1.0,
-        "population": {
-            "energy": {
-                "start_GeV": {
-                    "repr": "binning",
-                    "decade": -1,
-                    "bin": 3,
-                    "num_bins_per_decade": 5,
-                },
-                "stop_GeV": stop_GeV,
-                "power_law_slope": -1.5,
-            },
-            "direction": {
-                "scatter_cone": {
-                    "half_angle_rad": np.deg2rad([6.5, 6.5]),
-                    "energy_GeV": [1e-1, 1e4],
-                },
-            },
-        },
     }
 
-    MIN_PROTON_ENERGY_GEV = 5.0
     par["proton"] = {
-        "corsika_particle_id": 14,
+        "corsika": {"particle_id": 14, "min_energy_GeV": 5.0},
         "electric_charge_qe": +1.0,
-        "population": {
-            "energy": {
-                "start_GeV": {
-                    "repr": "explicit",
-                    "value": MIN_PROTON_ENERGY_GEV,
-                },
-                "stop_GeV": stop_GeV,
-                "power_law_slope": -1.5,
-            },
-            "direction": {
-                "scatter_cone": {
-                    "half_angle_rad": np.deg2rad([18.3, 18.3]),
-                    "energy_GeV": [1e0, 1e4],
-                },
-            },
-        },
     }
 
-    MIN_HELIUM_ENERGY_GEV = 10.0
     par["helium"] = {
-        "corsika_particle_id": 402,
+        "corsika": {"particle_id": 402, "min_energy_GeV": 10.0},
         "electric_charge_qe": +2.0,
-        "population": {
-            "energy": {
-                "start_GeV": {
-                    "repr": "explicit",
-                    "value": MIN_HELIUM_ENERGY_GEV,
-                },
-                "stop_GeV": stop_GeV,
-                "power_law_slope": -1.5,
-            },
-            "direction": {
-                "scatter_cone": {
-                    "half_angle_rad": np.deg2rad([18.3, 18.3]),
-                    "energy_GeV": [1e0, 1e4],
-                },
-            },
-        },
     }
 
     # assert all have same keys
@@ -132,6 +84,7 @@ def init(key):
     return _all()[key]
 
 
+"""
 def get_scatter_cone_half_angle_rad(particle, energy_GeV):
     sc = particle["population"]["direction"]["scatter_cone"]
     return interpolate_scatter_cone_half_angle(
@@ -158,6 +111,7 @@ def compile_energy(energy):
         return binning_utils.power10.lower_bin_edge(**_ecpy)
     else:
         raise KeyError()
+"""
 
 
 def interpolate_scatter_cone_half_angle(
@@ -182,17 +136,4 @@ def interpolate_scatter_cone_half_angle(
 
 
 def assert_valid(particle):
-    assert particle["corsika_particle_id"] >= 0
-    e_start = get_energy_start_GeV(particle=particle)
-    e_stop = get_energy_stop_GeV(particle=particle)
-    assert e_start < e_stop
-
-    sc_e_start = get_scatter_cone_half_angle_rad(
-        particle=particle, energy_GeV=e_start
-    )
-    sc_e_stop = get_scatter_cone_half_angle_rad(
-        particle=particle, energy_GeV=e_stop
-    )
-
-    assert sc_e_start >= 0.0
-    assert sc_e_stop >= 0.0
+    assert particle["corsika"]["particle_id"] >= 0
