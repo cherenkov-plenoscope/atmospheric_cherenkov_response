@@ -33,6 +33,33 @@ def particles():
     c["helium"]["color"] = "orange"
     c["helium"]["rgb"] = (1, 0.65, 0)
     c["helium"]["cmap"] = make_linear_cmap(c["helium"]["rgb"])
+
+    # put key into dict
+    # -----------------
+    for key in c:
+        c[key]["key"] = key
+    return c
+
+
+def sites():
+    c = {}
+    c["namibia"] = {"label": "Gamsberg", "marker": "+", "linestyle": "--"}
+    c["chile"] = {"label": "Chajnantor", "marker": "*", "linestyle": ":"}
+    c["lapalma"] = {
+        "label": "Roque",
+        "marker": "^",
+        "linestyle": "-",
+    }
+    c["namibiaOff"] = {
+        "label": "Gamsberg-Off",
+        "marker": ".",
+        "linestyle": "-.",
+    }
+
+    # put key into dict
+    # -----------------
+    for key in c:
+        c[key]["key"] = key
     return c
 
 

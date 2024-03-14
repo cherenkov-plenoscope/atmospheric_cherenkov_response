@@ -13,7 +13,6 @@ def _all():
         "geomagnetic_cutoff_rigidity_GV": 12.5,
         "coordinates_wgs1984": [-23.3425, 16.225556],
         "comment": "The Gamsberg-mesa in Khoma, Namibia, southern Africa.",
-        "plotting": {"label": "Gamsberg", "marker": "+", "linestyle": "--"},
     }
 
     sites["chile"] = {
@@ -24,7 +23,6 @@ def _all():
         "geomagnetic_cutoff_rigidity_GV": 10.0,
         "coordinates_wgs1984": [-23.0193, -67.7532],
         "comment": "Llano de Chajnantor in Chile, southern America.",
-        "plotting": {"label": "Chajnantor", "marker": "*", "linestyle": ":"},
     }
 
     sites["lapalma"] = {
@@ -35,11 +33,6 @@ def _all():
         "geomagnetic_cutoff_rigidity_GV": 10.0,
         "coordinates_wgs1984": [28.7615, -17.8906],
         "comment": "Roque de los Muchachos Observatory on La Palma, Spain",
-        "plotting": {
-            "label": "Roque",
-            "marker": "^",
-            "linestyle": "-",
-        },
     }
 
     PRACTICALLY_ZERO = (
@@ -53,11 +46,6 @@ def _all():
     sites["namibiaOff"]["earth_magnetic_field_x_muT"] = PRACTICALLY_ZERO
     sites["namibiaOff"]["earth_magnetic_field_z_muT"] = PRACTICALLY_ZERO
     sites["namibiaOff"]["geomagnetic_cutoff_rigidity_GV"] = 0.0
-    sites["namibiaOff"]["plotting"] = {
-        "label": "Gamsberg-Off",
-        "marker": ".",
-        "linestyle": "-.",
-    }
 
     # assert all have same keys
     # -------------------------

@@ -2,7 +2,7 @@ import numpy as np
 import corsika_primary
 import binning_utils
 
-"""
+
 def scatter_cone(key):
     out = {}
     out["gamma"] = {
@@ -32,7 +32,6 @@ def energy_stop_GeV():
         "num_bins_per_decade": 5,
     }
     return stop_GeV
-"""
 
 
 def _all():
