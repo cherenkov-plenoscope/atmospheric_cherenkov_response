@@ -30,7 +30,12 @@ def _all():
                 "stop_GeV": stop_GeV,
                 "power_law_slope": -1.5,
             },
-            "direction": {"scatter_cone_half_angle_deg": 3.25},
+            "direction": {
+                "scatter_cone": {
+                    "half_angle_rad": np.deg2rad([3.25, 3.25]),
+                    "energy_GeV": [1e-1, 1e4],
+                },
+            },
         },
     }
 
@@ -48,7 +53,12 @@ def _all():
                 "stop_GeV": stop_GeV,
                 "power_law_slope": -1.5,
             },
-            "direction": {"scatter_cone_half_angle_deg": 6.5},
+            "direction": {
+                "scatter_cone": {
+                    "half_angle_rad": np.deg2rad([6.5, 6.5]),
+                    "energy_GeV": [1e-1, 1e4],
+                },
+            },
         },
     }
 
@@ -65,7 +75,12 @@ def _all():
                 "stop_GeV": stop_GeV,
                 "power_law_slope": -1.5,
             },
-            "direction": {"scatter_cone_half_angle_deg": 18.3},
+            "direction": {
+                "scatter_cone": {
+                    "half_angle_rad": np.deg2rad([18.3, 18.3]),
+                    "energy_GeV": [1e0, 1e4],
+                },
+            },
         },
     }
 
@@ -82,7 +97,12 @@ def _all():
                 "stop_GeV": stop_GeV,
                 "power_law_slope": -1.5,
             },
-            "direction": {"scatter_cone_half_angle_deg": 18.3},
+            "direction": {
+                "scatter_cone": {
+                    "half_angle_rad": np.deg2rad([18.3, 18.3]),
+                    "energy_GeV": [1e0, 1e4],
+                },
+            },
         },
     }
 
@@ -112,6 +132,23 @@ def init(key):
     return _all()[key]
 
 
+def get_scatter_cone_half_angle_rad(particle, energy_GeV):
+    sc = particle["population"]["direction"]["scatter_cone"]
+    return interpolate_scatter_cone_half_angle(
+        energy_GeV=energy_GeV,
+        scatter_cone_energy_GeV=sc["energy_GeV"],
+        scatter_cone_half_angle_rad=sc["half_angle_rad"],
+    )
+
+
+def get_energy_start_GeV(particle):
+    return compile_energy(energy=particle["population"]["energy"]["start_GeV"])
+
+
+def get_energy_stop_GeV(particle):
+    return compile_energy(energy=particle["population"]["energy"]["stop_GeV"])
+
+
 def compile_energy(energy):
     _ecpy = energy.copy()
     _repr = _ecpy.pop("repr")
@@ -123,11 +160,39 @@ def compile_energy(energy):
         raise KeyError()
 
 
+def interpolate_scatter_cone_half_angle(
+    energy_GeV,
+    scatter_cone_energy_GeV,
+    scatter_cone_half_angle_rad,
+):
+    energies_GeV = np.asarray(scatter_cone_energy_GeV)
+    half_angles_rad = np.asarray(scatter_cone_half_angle_rad)
+
+    assert binning_utils.is_strictly_monotonic_increasing(energies_GeV)
+    assert np.all(energies_GeV > 0.0)
+    assert energy_GeV > 0.0
+    assert np.all(half_angles_rad >= 0.0)
+    assert np.all(half_angles_rad <= np.pi)
+    assert min(energies_GeV) <= energy_GeV <= max(energies_GeV)
+
+    half_angle_rad = np.interp(
+        x=energy_GeV, xp=energies_GeV, fp=half_angles_rad
+    )
+    return half_angle_rad
+
+
 def assert_valid(particle):
     assert particle["corsika_particle_id"] >= 0
-    assert (
-        particle["population"]["direction"]["scatter_cone_half_angle_deg"]
-        >= 0.0
+    e_start = get_energy_start_GeV(particle=particle)
+    e_stop = get_energy_stop_GeV(particle=particle)
+    assert e_start < e_stop
+
+    sc_e_start = get_scatter_cone_half_angle_rad(
+        particle=particle, energy_GeV=e_start
     )
-    assert compile_energy(particle["population"]["energy"]["start_GeV"]) > 0.0
-    assert compile_energy(particle["population"]["energy"]["stop_GeV"]) > 0.0
+    sc_e_stop = get_scatter_cone_half_angle_rad(
+        particle=particle, energy_GeV=e_stop
+    )
+
+    assert sc_e_start >= 0.0
+    assert sc_e_stop >= 0.0
