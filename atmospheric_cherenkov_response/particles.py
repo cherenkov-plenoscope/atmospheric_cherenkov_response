@@ -113,25 +113,25 @@ def compile_energy(energy):
 """
 
 
-def interpolate_scatter_cone_half_angle(
+def interpolate_scatter_solid_angle(
     energy_GeV,
-    scatter_cone_energy_GeV,
-    scatter_cone_half_angle_rad,
+    scatter_energy_GeV,
+    scatter_solid_angle_sr,
 ):
-    energies_GeV = np.asarray(scatter_cone_energy_GeV)
-    half_angles_rad = np.asarray(scatter_cone_half_angle_rad)
+    energies_GeV = np.asarray(scatter_energy_GeV)
+    solid_angles_sr = np.asarray(scatter_solid_angle_sr)
 
     assert binning_utils.is_strictly_monotonic_increasing(energies_GeV)
     assert np.all(energies_GeV > 0.0)
     assert energy_GeV > 0.0
-    assert np.all(half_angles_rad >= 0.0)
-    assert np.all(half_angles_rad <= np.pi)
+    assert np.all(solid_angles_sr >= 0.0)
+    assert np.all(solid_angles_sr <= 4 * np.pi)
     assert min(energies_GeV) <= energy_GeV <= max(energies_GeV)
 
-    half_angle_rad = np.interp(
-        x=energy_GeV, xp=energies_GeV, fp=half_angles_rad
+    solid_angle_sr = np.interp(
+        x=energy_GeV, xp=energies_GeV, fp=solid_angles_sr
     )
-    return half_angle_rad
+    return solid_angle_sr
 
 
 def assert_valid(particle):
