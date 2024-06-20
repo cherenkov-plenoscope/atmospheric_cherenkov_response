@@ -6,6 +6,7 @@ from . import atmosphere
 def _all():
     sites = {}
     sites["namibia"] = {
+        "name": "Namibia",
         "observation_level_asl_m": 2300,
         "earth_magnetic_field_x_muT": 12.5,
         "earth_magnetic_field_z_muT": -25.9,
@@ -16,6 +17,7 @@ def _all():
     }
 
     sites["chile"] = {
+        "name": "Chile",
         "observation_level_asl_m": 5000,
         "earth_magnetic_field_x_muT": 20.815,
         "earth_magnetic_field_z_muT": -11.366,
@@ -26,6 +28,7 @@ def _all():
     }
 
     sites["lapalma"] = {
+        "name": "La Palma, Spain",
         "observation_level_asl_m": 2200,
         "earth_magnetic_field_x_muT": 30.419,
         "earth_magnetic_field_z_muT": 23.856,
@@ -46,6 +49,7 @@ def _all():
     sites["namibiaOff"]["earth_magnetic_field_x_muT"] = PRACTICALLY_ZERO
     sites["namibiaOff"]["earth_magnetic_field_z_muT"] = PRACTICALLY_ZERO
     sites["namibiaOff"]["geomagnetic_cutoff_rigidity_GV"] = 0.0
+    sites["namibiaOff"]["name"] = "Namibia, but no mag. field"
 
     # assert all have same keys
     # -------------------------
