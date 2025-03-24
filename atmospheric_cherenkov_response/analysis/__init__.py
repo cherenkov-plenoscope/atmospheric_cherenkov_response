@@ -78,6 +78,23 @@ def effective_quantity_for_grid(
     f_{detected,m}  Flag marking that m-th air-shower is a valid detection.
 
     """
+    assert np.all(energy_bin_edges_GeV > 0)
+    assert np.all(np.gradient(energy_bin_edges_GeV) > 0)
+
+    assert np.all(energy_GeV > 0.0)
+
+    assert np.all(mask_detected >= 0)
+
+    assert np.all(quantity_scatter >= 0.0)
+
+    assert np.all(num_grid_cells_above_lose_threshold >= 0)
+
+    assert np.all(total_num_grid_cells > 0)
+
+    num_grid_cells_above_lose_threshold = np.asarray(
+        num_grid_cells_above_lose_threshold, dtype=np.int64
+    )
+    total_num_grid_cells = np.asarray(total_num_grid_cells, dtype=np.int64)
 
     quantity_detected = np.histogram(
         energy_GeV,
@@ -88,12 +105,14 @@ def effective_quantity_for_grid(
             * quantity_scatter
         ),
     )[0]
+    assert np.all(quantity_detected >= 0.0)
 
     count_thrown = np.histogram(
         energy_GeV,
         weights=total_num_grid_cells,
         bins=energy_bin_edges_GeV,
     )[0]
+    assert np.all(count_thrown >= 0.0)
 
     effective_quantity = divide_silent(
         numerator=quantity_detected, denominator=count_thrown, default=0.0
@@ -107,12 +126,14 @@ def effective_quantity_for_grid(
         bins=energy_bin_edges_GeV,
         weights=(mask_detected * num_grid_cells_above_lose_threshold**2),
     )[0]
+    assert np.all(A_square >= 0.0)
 
     A = np.histogram(
         energy_GeV,
         bins=energy_bin_edges_GeV,
         weights=(mask_detected * num_grid_cells_above_lose_threshold),
     )[0]
+    assert np.all(A >= 0.0)
 
     effective_quantity_relative_uncertainty = divide_silent(
         numerator=np.sqrt(A_square), denominator=A, default=0.0
