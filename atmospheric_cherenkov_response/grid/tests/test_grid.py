@@ -36,15 +36,21 @@ def make_cherenkov_bunches(
     cherenkov_bunches[:, cpw.I.BUNCH.Y_CM] = prng.normal(
         loc=y_m * cpw.M2CM, scale=y_std_m * cpw.M2CM, size=num_bunches
     )
-    cherenkov_bunches[
-        :, cpw.I.BUNCH.UX_1
-    ] = INCIDENT_TO_MOMENTUM * prng.normal(
-        loc=np.deg2rad(cx_deg), scale=np.deg2rad(cx_std_deg), size=num_bunches
+    cherenkov_bunches[:, cpw.I.BUNCH.UX_1] = (
+        INCIDENT_TO_MOMENTUM
+        * prng.normal(
+            loc=np.deg2rad(cx_deg),
+            scale=np.deg2rad(cx_std_deg),
+            size=num_bunches,
+        )
     )
-    cherenkov_bunches[
-        :, cpw.I.BUNCH.VY_1
-    ] = INCIDENT_TO_MOMENTUM * prng.normal(
-        loc=np.deg2rad(cy_deg), scale=np.deg2rad(cy_std_deg), size=num_bunches
+    cherenkov_bunches[:, cpw.I.BUNCH.VY_1] = (
+        INCIDENT_TO_MOMENTUM
+        * prng.normal(
+            loc=np.deg2rad(cy_deg),
+            scale=np.deg2rad(cy_std_deg),
+            size=num_bunches,
+        )
     )
     cherenkov_bunches[:, cpw.I.BUNCH.TIME_NS] = prng.normal(
         loc=100e-6, scale=10e-9, size=num_bunches

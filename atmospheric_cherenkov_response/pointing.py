@@ -2,6 +2,7 @@
 Defines how the pointing of a telescope's mount effects the
 rotation of its principal aperture plane.
 """
+
 import numpy as np
 import spherical_coordinates
 

@@ -110,13 +110,13 @@ def init(
         },
     }
 
-    instrument["camera"]["pixel"][
-        "average_background_rate_per_s"
-    ] = estimate_rate_in_trigger_pixel_from_night_sky_background(
-        instrument=instrument,
-        background_wavelength_m=background_wavelength_m,
-        background_differential_flux_per_m2_per_sr_per_s_per_m=background_differential_flux_per_m2_per_sr_per_s_per_m,
-        num_wavelength_steps=1337,
+    instrument["camera"]["pixel"]["average_background_rate_per_s"] = (
+        estimate_rate_in_trigger_pixel_from_night_sky_background(
+            instrument=instrument,
+            background_wavelength_m=background_wavelength_m,
+            background_differential_flux_per_m2_per_sr_per_s_per_m=background_differential_flux_per_m2_per_sr_per_s_per_m,
+            num_wavelength_steps=1337,
+        )
     )
 
     return instrument
