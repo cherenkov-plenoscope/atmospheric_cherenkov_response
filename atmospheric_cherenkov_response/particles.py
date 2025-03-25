@@ -14,11 +14,11 @@ def scatter_cone(key):
         "energy_GeV": [1e-1, 1e4],
     }
     out["proton"] = {
-        "half_angle_rad": np.deg2rad([18.3, 18.3]),
+        "half_angle_rad": np.deg2rad([15.0, 15.0]),
         "energy_GeV": [1e0, 1e4],
     }
     out["helium"] = {
-        "half_angle_rad": np.deg2rad([18.3, 18.3]),
+        "half_angle_rad": np.deg2rad([15.0, 15.0]),
         "energy_GeV": [1e0, 1e4],
     }
     return out[key]
