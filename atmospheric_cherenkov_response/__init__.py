@@ -1,6 +1,5 @@
 from .version import __version__
 from . import analysis
-from . import grid
 from . import instrument
 from . import night_sky_background
 from . import particles
