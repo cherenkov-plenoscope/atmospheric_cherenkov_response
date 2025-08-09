@@ -1,4 +1,3 @@
-from . import serialization
 from . import artificial_core_limitation
 import numpy as np
 import corsika_primary as cpw
