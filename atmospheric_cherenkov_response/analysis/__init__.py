@@ -74,7 +74,7 @@ def effective_quantity_for_grid(
     assert _num_events == len(num_grid_cells_above_lose_threshold)
     assert _num_events == len(total_num_grid_cells)
 
-    f_detected = np.asarray(mask_detected, dtype=bool)
+    f_detected = np.asarray(mask_detected, dtype=float)
     Q_scatter = np.asarray(quantity_scatter, dtype=float)
     N_S = np.asarray(num_grid_cells_above_lose_threshold, dtype=np.int64)
     N_G = np.asarray(total_num_grid_cells, dtype=np.int64)
