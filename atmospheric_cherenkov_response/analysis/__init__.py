@@ -186,9 +186,10 @@ def effective_quantity_for_grid_vs_energy(
 
     for enbin in range(num_energy_bins):
         energy_start_GeV = energy_bin_edges_GeV[enbin]
-        energy_stop_GeV = energy_bin_edges_GeV[ebin + 1]
+        energy_stop_GeV = energy_bin_edges_GeV[enbin + 1]
         energy_mask = np.logical_and(
-            energy_start_GeV <= energy_GeV, energy_stop_GeV > energy_GeV
+            energy_GeV >= energy_start_GeV,
+            energy_GeV < energy_stop_GeV,
         )
 
         (Q_effective_vs_energy[enbin], Q_effective_absunc_vs_energy[enbin]) = (
